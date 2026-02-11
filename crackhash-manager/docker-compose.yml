@@ -1,0 +1,28 @@
+version: '3.3'
+services:
+  crackhash_db_mongo:
+    image: mongo:8.0
+    container_name: "crackhash-mongo"
+    ports:
+      - '27017:27017'
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 300mb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo_user
+      - MONGO_INITDB_ROOT_PASSWORD=mongo_password
+
+  crackhash_migrate_mongo:
+    image: mongo:8.0
+    container_name: "crackhash-migrate-mongo"
+    depends_on:
+      crackhash_db_mongo:
+        condition: service_started
+    restart: no
+    volumes:
+      - ./src/main/resources/mongo_schema:/scripts
+    command: > 
+      mongosh
+      "mongodb://mongo_user:mongo_password@crackhash_db_mongo:27017/myapp?authSource=admin"
+      --file /scripts/schema.js
