@@ -1,4 +1,4 @@
-package ru.nsu.crackhash.manager.api.dto;
+package ru.nsu.crackhash.manager.core.persistance.model;
 
 public enum CrackingHashTaskStatus {
     IN_PROGRESS,

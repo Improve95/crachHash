@@ -1,18 +1,18 @@
-package ru.nsu.crackhash.manager.configuration;
+package ru.nsu.crackhash.manager.config.alphabet;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-@Getter
 @Component
 public class AlphabetConfig {
 
-    public final Character[] ALPHABET;
+    @Getter
+    private final char[] alphabet;
 
     public AlphabetConfig() {
-        ALPHABET = new Character[26];
+        alphabet = new char[26];
         for (int c = 'a'; c <= 'z'; c++) {
-            ALPHABET[c - 'a'] = (char) c;
+            alphabet[c - 'a'] = (char) c;
         }
     }
 }

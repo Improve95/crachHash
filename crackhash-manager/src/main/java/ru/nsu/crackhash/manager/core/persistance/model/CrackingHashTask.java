@@ -3,10 +3,12 @@ package ru.nsu.crackhash.manager.core.persistance.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-@Document
+@Document("cracking_hash_tasks")
 public class CrackingHashTask {
 
     @Id
@@ -14,7 +16,11 @@ public class CrackingHashTask {
 
     private String hash;
 
-    private int length;
+    private int maxLength;
 
-    private List<String> matches;
+    private Map<Integer, List<String>> workerResultMap;
+
+    private CrackingHashTaskStatus status;
+
+    private Instant startedAt;
 }

@@ -1,3 +1,26 @@
 spring:
   application:
     name: crackhash-manager
+
+worker:
+  number: 2
+
+crack-hash:
+  task:
+    lifetime-duration-threshold: PT1M
+
+  kafka:
+    producer:
+      config:
+        bootstrap-servers: localhost:9092
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+        retries: 0
+        acks: all
+      topic: crackhash_task_request_topic
+    consumer:
+      config:
+        bootstrap-servers: localhost:9092
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      topic: crackhash_task_result_topic
