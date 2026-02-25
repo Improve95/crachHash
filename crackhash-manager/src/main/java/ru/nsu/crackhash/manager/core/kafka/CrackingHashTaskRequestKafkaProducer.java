@@ -15,6 +15,6 @@ public class CrackingHashTaskRequestKafkaProducer {
     private final ObjectMapper objectMapper;
 
     public void sendCrackHashTask(String topic, CrackHashTaskRequestKafkaMessage message) {
-        var result = kafkaTemplate.send(topic, objectMapper.writeValueAsString(message));
+        kafkaTemplate.send(topic, objectMapper.writeValueAsString(message));
     }
 }

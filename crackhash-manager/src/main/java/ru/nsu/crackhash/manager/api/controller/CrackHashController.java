@@ -23,13 +23,17 @@ public class CrackHashController {
     private final HashWordService hashWordService;
 
     @PostMapping("/crack")
-    public ResponseEntity<StartCrackingHashProcessResponse> findWord(@RequestBody StartCrackingHashProcessRequest startCrackingHashProcessRequest) {
+    public ResponseEntity<StartCrackingHashProcessResponse> findWord(
+        @RequestBody StartCrackingHashProcessRequest startCrackingHashProcessRequest
+    ) {
         var response = hashWordService.startCrackHash(startCrackingHashProcessRequest);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/status")
-    public ResponseEntity<GetCrackHashProcessStatusResponse> getWordStatusResponse(@RequestParam("requestId") UUID requestId) {
+    public ResponseEntity<GetCrackHashProcessStatusResponse> getWordStatusResponse(
+        @RequestParam("requestId") UUID requestId
+    ) {
         return null;
     }
 }

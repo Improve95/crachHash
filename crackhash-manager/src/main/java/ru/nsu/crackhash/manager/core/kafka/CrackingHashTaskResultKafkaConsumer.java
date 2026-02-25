@@ -5,14 +5,14 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskResultKafkaMessage;
-import ru.nsu.crackhash.manager.core.service.HashWordService;
+import ru.nsu.crackhash.manager.core.service.CrackingHashResultCollector;
 import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
 @Component
 public class CrackingHashTaskResultKafkaConsumer {
 
-    private final HashWordService hashWordService;
+    private final CrackingHashResultCollector crackingHashResultCollector;
 
     private final ObjectMapper objectMapper;
 
@@ -22,7 +22,7 @@ public class CrackingHashTaskResultKafkaConsumer {
     )
     private void listenCrackHashTaskResultTopic(String body, Acknowledgment acknowledgment) {
         var crackingHashResult = objectMapper.readValue(body, CrackHashTaskResultKafkaMessage.class);
-        hashWordService.handleCrackHashTaskResult(crackingHashResult);
+        crackingHashResultCollector.handleCrackHashTaskResult(crackingHashResult);
         acknowledgment.acknowledge();
     }
 }

@@ -6,25 +6,22 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
 import java.util.UUID;
 
-@Document("cracking_hash_tasks")
+@Document("cracking_hash_workers_tasks")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CrackingHashTask {
+public class CrackingHashWorkerTask {
 
     @Id
     private UUID id;
 
-    private String hash;
+    private UUID parentCrackingHashTaskId;
 
-    private int maxLength;
+    private int partNumber;
 
-//    private Map<UUID, List<String>> workerResultMap;
+    private long partCount;
 
-    private CrackingHashTaskStatus status;
-
-    private Instant startedAt;
+    private CrackingHashWorkerTaskStatus status;
 }
