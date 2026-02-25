@@ -2,6 +2,13 @@ spring:
   application:
     name: crackhash-manager
 
+  mongodb:
+    host: localhost
+    port: 27017
+    database: crackhash_db_mongo
+    username: mongo_user
+    password: mongo_password
+
 worker:
   number: 2
 

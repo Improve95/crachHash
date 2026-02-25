@@ -1,6 +1,7 @@
 package ru.nsu.crackhash.manager.core.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskResultKafkaMessage;
 import ru.nsu.crackhash.manager.core.service.CrackingHashResultCollector;
@@ -9,6 +10,7 @@ import ru.nsu.crackhash.manager.core.service.CrackingHashResultCollector;
 @Service
 public class CrackingHashResultCollectorImpl implements CrackingHashResultCollector {
 
+    @Async
     @Override
     public void handleCrackHashTaskResult(CrackHashTaskResultKafkaMessage result) {
         log.info("Received crack hash task result, id: {}", result.requestId());
