@@ -1,3 +1,21 @@
 spring:
   application:
     name: crackhash-worker
+
+crack-hash:
+  kafka:
+    producer:
+      config:
+        bootstrap-servers: localhost:9092
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+        retries: 0
+        acks: all
+      topic: crackhash_task_result_topic
+
+    consumer:
+      config:
+        bootstrap-servers: localhost:9092
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      topic: crackhash_task_request_topic

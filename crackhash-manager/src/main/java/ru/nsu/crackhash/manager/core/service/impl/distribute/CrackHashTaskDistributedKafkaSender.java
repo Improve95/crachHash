@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskRequestKafkaMessage;
-import ru.nsu.crackhash.manager.core.kafka.CrackingHashTaskRequestKafkaSender;
+import ru.nsu.crackhash.manager.core.kafka.CrackingHashTaskRequestKafkaProducer;
 import ru.nsu.crackhash.manager.core.service.CrackHashTaskDistributed;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class CrackHashTaskDistributedKafkaSender implements CrackHashTaskDistributed {
 
-    private final CrackingHashTaskRequestKafkaSender crackingHashTaskRequestKafkaSender;
+    private final CrackingHashTaskRequestKafkaProducer crackingHashTaskRequestKafkaProducer;
 
     @Value("${crack-hash.kafka.producer.topic}")
     private String crackHashTaskRequestTopic;
@@ -24,7 +24,7 @@ public class CrackHashTaskDistributedKafkaSender implements CrackHashTaskDistrib
     public void distributedSendCrackHashTasks(List<CrackHashTaskRequestKafkaMessage> requests) {
         requests.forEach(request -> {
             log.info("Sending crack hash task request to topic {}: {}", crackHashTaskRequestTopic, request);
-            crackingHashTaskRequestKafkaSender.sendCrackHashTask(crackHashTaskRequestTopic, request);
+            crackingHashTaskRequestKafkaProducer.sendCrackHashTask(crackHashTaskRequestTopic, request);
         });
     }
 }

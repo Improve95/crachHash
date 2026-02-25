@@ -7,9 +7,9 @@ import java.util.UUID;
 @Builder
 public record CreateCrackHashTaskRequest(
         String hash,
-        int maxLength,
         char[] alphabet,
+        int maxLength,
         int partNumber,
-        int partCount,
+        long partCount,
         UUID requestId
 ) {}

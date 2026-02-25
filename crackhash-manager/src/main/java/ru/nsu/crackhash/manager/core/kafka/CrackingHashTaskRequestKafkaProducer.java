@@ -8,7 +8,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
 @Component
-public class CrackingHashTaskRequestKafkaSender {
+public class CrackingHashTaskRequestKafkaProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 

@@ -4,5 +4,5 @@ import ru.nsu.crackhash.worker.api.dto.CreateCrackHashTaskRequest;
 
 public interface HashCrackingService {
 
-    void createCrackHashTask(CreateCrackHashTaskRequest createCrackHashTaskRequest);
+    boolean createCrackHashTask(CreateCrackHashTaskRequest createCrackHashTaskRequest);
 }
