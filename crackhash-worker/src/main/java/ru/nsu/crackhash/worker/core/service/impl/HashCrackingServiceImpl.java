@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.paukov.combinatorics3.Generator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.worker.api.dto.CreateCrackHashTaskRequest;
 import ru.nsu.crackhash.worker.core.feign.manager.dto.SendCrackResultRequest;
@@ -20,9 +19,6 @@ public class HashCrackingServiceImpl implements HashCrackingService {
     private final CryptoService cryptoService;
 
     private final ResultService resultService;
-
-    @Value("${crack-hash.kafka.producer.topic}")
-    private String crackHashResultTopic;
 
     @Override
     public boolean createCrackHashTask(CreateCrackHashTaskRequest createCrackHashTaskRequest) {

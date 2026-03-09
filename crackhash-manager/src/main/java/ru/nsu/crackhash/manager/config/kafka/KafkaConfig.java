@@ -12,7 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import ru.nsu.crackhash.manager.config.kafka.properties.CrackHashKafkaProperties;
 
-@ConditionalOnProperty(name = "send-type.kafka")
+@ConditionalOnProperty(name = "send-type", havingValue = "kafka")
 @RequiredArgsConstructor
 @Configuration
 public class KafkaConfig {
