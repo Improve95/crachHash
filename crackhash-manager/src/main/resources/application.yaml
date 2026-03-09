@@ -9,8 +9,11 @@ spring:
     username: mongo_user
     password: mongo_password
 
+send-type:
+  kafka: false
+
 worker:
-  number: 2
+  number: 1
 
 crack-hash:
   task:

@@ -2,6 +2,7 @@ package ru.nsu.crackhash.worker.config.kafka;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -12,6 +13,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import ru.nsu.crackhash.worker.config.kafka.properties.CrackHashKafkaProperties;
 
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "send-type.kafka")
 @Configuration
 public class KafkaConfig {
 

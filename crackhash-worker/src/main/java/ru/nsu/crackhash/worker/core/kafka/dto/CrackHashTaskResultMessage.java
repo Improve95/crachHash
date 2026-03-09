@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
-public record CrackHashTaskResultKafkaMessage(
-    UUID requestId,
-    int partNumber,
+public record CrackHashTaskResultMessage(
+    UUID taskId,
     List<String> answers
 ) {}

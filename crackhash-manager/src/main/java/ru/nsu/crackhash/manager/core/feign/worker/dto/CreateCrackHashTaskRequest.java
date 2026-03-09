@@ -1,11 +1,11 @@
-package ru.nsu.crackhash.manager.core.kafka.dto;
+package ru.nsu.crackhash.manager.core.feign.worker.dto;
 
 import lombok.Builder;
 
 import java.util.UUID;
 
 @Builder
-public record CrackHashTaskRequestKafkaMessage(
+public record CreateCrackHashTaskRequest(
     UUID requestId,
     int partNumber,
     long partCount,

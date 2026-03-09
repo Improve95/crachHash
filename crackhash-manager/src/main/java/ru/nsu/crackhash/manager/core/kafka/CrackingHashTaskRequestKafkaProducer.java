@@ -3,7 +3,7 @@ package ru.nsu.crackhash.manager.core.kafka;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskRequestKafkaMessage;
+import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
@@ -14,7 +14,7 @@ public class CrackingHashTaskRequestKafkaProducer {
 
     private final ObjectMapper objectMapper;
 
-    public void sendCrackHashTask(String topic, CrackHashTaskRequestKafkaMessage message) {
+    public void sendCrackHashTask(String topic, CrackHashTaskWorkerRequest message) {
         kafkaTemplate.send(topic, objectMapper.writeValueAsString(message));
     }
 }

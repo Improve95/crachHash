@@ -1,11 +1,14 @@
 package ru.nsu.crackhash.manager.core.service;
 
-import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTask;
-import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashWorkerTask;
+import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
+import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
+
+import java.util.List;
+import java.util.UUID;
 
 public interface CrackingHashTaskService {
 
-    void createCrackHash(CrackingHashTask crackingHashTask);
-
-    void createCrackHashWorkerTask(CrackingHashWorkerTask crackingHashWorkerTask);
+    List<CrackHashTaskWorkerRequest> createCrackRequest(
+        UUID requestId, StartCrackingHashProcessRequest request
+    );
 }

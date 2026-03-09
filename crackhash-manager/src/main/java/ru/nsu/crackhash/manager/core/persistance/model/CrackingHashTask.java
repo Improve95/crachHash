@@ -2,14 +2,19 @@ package ru.nsu.crackhash.manager.core.persistance.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Document("cracking_hash_tasks")
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +27,9 @@ public class CrackingHashTask {
 
     private int maxLength;
 
-//    private Map<UUID, List<String>> workerResultMap;
+    private List<String> answers;
+
+    private int taskPartCount;
 
     private CrackingHashTaskStatus status;
 

@@ -2,6 +2,8 @@ spring:
   application:
     name: crackhash-worker
 
+send-type: rest
+
 crack-hash:
   kafka:
     producer:

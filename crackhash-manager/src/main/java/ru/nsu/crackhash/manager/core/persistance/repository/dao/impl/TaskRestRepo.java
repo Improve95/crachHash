@@ -1,0 +1,59 @@
+package ru.nsu.crackhash.manager.core.persistance.repository.dao.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTask;
+import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Semaphore;
+
+@RequiredArgsConstructor
+@ConditionalOnProperty(name = "send-type", havingValue = "rest")
+@Component
+public class TaskRestRepo implements TaskRepo {
+
+    private final Queue<UUID> crackingHashQueue = new ConcurrentLinkedDeque<>();
+
+    private final Map<UUID, CrackingHashTask> crackingHashTaskMap = new ConcurrentHashMap<>();
+
+    private final Map<UUID, Semaphore> taskSemaphoreMap = new ConcurrentHashMap<>();
+
+    @Override
+    public int putInQueue(CrackingHashTask crackingHashTask) {
+        crackingHashTaskMap.putIfAbsent(crackingHashTask.getId(), crackingHashTask);
+        crackingHashQueue.add(crackingHashTask.getId());
+        return crackingHashQueue.size();
+    }
+
+    @Override
+    public CrackingHashTask removeFromQueue() {
+        return crackingHashTaskMap.get(crackingHashQueue.poll());
+    }
+
+    @Override
+    public CrackingHashTask getTask(UUID taskId) {
+        return crackingHashTaskMap.get(taskId);
+    }
+
+    @Override
+    public void addAnswers(UUID taskId, List<String> newAnswers) {
+        var taskSemaphore = taskSemaphoreMap.computeIfAbsent(taskId, k -> new Semaphore(1));
+        try {
+            taskSemaphore.acquire();
+            var task = crackingHashTaskMap.get(taskId);
+            if (task != null) {
+                task.getAnswers().addAll(newAnswers);
+            }
+            taskSemaphore.release();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+}

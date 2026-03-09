@@ -15,8 +15,6 @@ import java.util.UUID;
 public class CrackingHashWorkerTask {
 
     @Id
-    private UUID id;
-
     private UUID parentCrackingHashTaskId;
 
     private int partNumber;
