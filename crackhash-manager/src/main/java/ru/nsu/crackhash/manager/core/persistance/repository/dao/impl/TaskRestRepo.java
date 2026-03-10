@@ -59,6 +59,7 @@ public class TaskRestRepo implements TaskRepo {
             var task = crackingHashTaskMap.get(taskId);
             if (task != null) {
                 task.getAnswers().addAll(newAnswers);
+                task.setCurrentCompletedTaskPartCount(task.getCurrentCompletedTaskPartCount() + 1);
             }
             taskSemaphore.release();
         } catch (Exception ex) {
