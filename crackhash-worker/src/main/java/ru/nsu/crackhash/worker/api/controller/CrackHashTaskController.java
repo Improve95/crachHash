@@ -1,6 +1,7 @@
 package ru.nsu.crackhash.worker.api.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,9 +17,10 @@ public class CrackHashTaskController {
     private final HashCrackingService hashCrackingService;
 
     @PostMapping("/hash/crack/task")
-    public void createCrackHashTask(
+    public ResponseEntity<Void> createCrackHashTask(
         @RequestBody CreateCrackHashTaskRequest createCrackHashTaskRequest
     ) {
         hashCrackingService.createCrackHashTask(createCrackHashTaskRequest);
+        return ResponseEntity.ok(null);
     }
 }

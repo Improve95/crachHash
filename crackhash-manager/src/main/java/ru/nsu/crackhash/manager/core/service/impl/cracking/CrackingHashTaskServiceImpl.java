@@ -24,7 +24,7 @@ public class CrackingHashTaskServiceImpl implements CrackingHashTaskService {
 
     @Override
     public List<CrackHashTaskWorkerRequest> createCrackRequest(UUID taskId, StartCrackingHashProcessRequest request) {
-        BigInteger bigInteger = BigInteger.valueOf(alphabetConfig.getAlphabet().length);
+        BigInteger bigInteger = BigInteger.valueOf(alphabetConfig.getAlphabet().size());
         bigInteger = bigInteger.pow(request.maxLength());
         long potentialWordsCount = bigInteger.longValue();
 
@@ -43,6 +43,7 @@ public class CrackingHashTaskServiceImpl implements CrackingHashTaskService {
                     .partCount(partCount)
                     .hash(request.hash())
                     .maxLength(request.maxLength())
+                    .alphabet(alphabetConfig.getAlphabet())
                     .build()
             );
         }

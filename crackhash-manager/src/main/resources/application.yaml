@@ -1,6 +1,16 @@
+server:
+  port: 8085
+
 spring:
   application:
     name: crackhash-manager
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          workerFeignClient:
+            url: http://localhost:8086
 
   mongodb:
     host: localhost

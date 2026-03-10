@@ -33,6 +33,15 @@ public class TaskRestRepo implements TaskRepo {
     }
 
     @Override
+    public CrackingHashTask getFromQueue() {
+        UUID taskId = crackingHashQueue.peek();
+        if (taskId != null) {
+            return crackingHashTaskMap.get(crackingHashQueue.peek());
+        }
+        return null;
+    }
+
+    @Override
     public CrackingHashTask removeFromQueue() {
         return crackingHashTaskMap.get(crackingHashQueue.poll());
     }

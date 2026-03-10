@@ -34,9 +34,5 @@ public class CrackingHashTaskRequestKafkaConsumer {
         var isComplete = hashCrackingService.createCrackHashTask(
             crackHashRequestDtoMapper.toCreateCrackHashTaskRequest(crackingHashRequestMessage)
         );
-
-        if (isComplete) {
-            acknowledgment.acknowledge();
-        }
     }
 }

@@ -29,6 +29,8 @@ public class CrackingHashTask {
 
     private List<String> answers;
 
+    private int currentCompletedTaskPartCount;
+
     private int taskPartCount;
 
     private CrackingHashTaskStatus status;

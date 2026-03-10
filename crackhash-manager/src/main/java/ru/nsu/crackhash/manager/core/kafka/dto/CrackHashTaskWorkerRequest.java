@@ -2,6 +2,7 @@ package ru.nsu.crackhash.manager.core.kafka.dto;
 
 import lombok.Builder;
 
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -11,5 +12,5 @@ public record CrackHashTaskWorkerRequest(
     long partCount,
     String hash,
     int maxLength,
-    char[] alphabet
+    List<String> alphabet
 ) {}

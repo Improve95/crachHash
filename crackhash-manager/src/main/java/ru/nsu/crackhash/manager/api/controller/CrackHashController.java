@@ -3,10 +3,11 @@ package ru.nsu.crackhash.manager.api.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.nsu.crackhash.manager.api.dto.GetCrackHashProcessStatusResponse;
 import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
@@ -36,8 +37,11 @@ public class CrackHashController {
         hashWordService.receiveCrackHashResult(request);
     }
 
-    @PostMapping("/request/{id}/status")
-    public ResponseEntity<GetCrackHashProcessStatusResponse> getWordStatusResponse(@PathVariable("id") UUID requestId) {
-        return null;
+    @GetMapping("/request/status")
+    public ResponseEntity<GetCrackHashProcessStatusResponse> getWordStatusResponse(
+        @RequestParam(value = "requestId") UUID requestId
+    ) {
+        var response = hashWordService.getCrackingHashStatus(requestId);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

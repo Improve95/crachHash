@@ -1,10 +1,22 @@
+server:
+  port: 8086
+
 spring:
   application:
     name: crackhash-worker
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          managerFeignClient:
+            url: http://localhost:8085
+
 send-type: rest
 
 crack-hash:
+  cracking-hash-thread-pool-size: 50
+
   kafka:
     producer:
       config:

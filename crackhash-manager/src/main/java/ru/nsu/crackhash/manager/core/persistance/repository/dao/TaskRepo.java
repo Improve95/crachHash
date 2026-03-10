@@ -9,6 +9,8 @@ public interface TaskRepo {
 
     int putInQueue(CrackingHashTask crackingHashTask);
 
+    CrackingHashTask getFromQueue();
+
     CrackingHashTask removeFromQueue();
 
     CrackingHashTask getTask(UUID taskId);

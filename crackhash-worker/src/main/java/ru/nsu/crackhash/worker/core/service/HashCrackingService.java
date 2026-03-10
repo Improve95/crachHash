@@ -2,7 +2,9 @@ package ru.nsu.crackhash.worker.core.service;
 
 import ru.nsu.crackhash.worker.api.dto.CreateCrackHashTaskRequest;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface HashCrackingService {
 
-    boolean createCrackHashTask(CreateCrackHashTaskRequest createCrackHashTaskRequest);
+    CompletableFuture<Boolean> createCrackHashTask(CreateCrackHashTaskRequest createCrackHashTaskRequest);
 }
