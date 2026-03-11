@@ -1,27 +1,59 @@
 package ru.nsu.crackhash.manager.core.kafka;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
 import ru.nsu.crackhash.manager.config.kafka.KafkaConfig;
-import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskResultKafkaMessage;
+import ru.nsu.crackhash.manager.core.service.HashWordService;
 import tools.jackson.databind.ObjectMapper;
 
-@RequiredArgsConstructor
 @ConditionalOnBean(KafkaConfig.class)
 @Component
 public class CrackingHashTaskResultKafkaConsumer {
 
+    private final HashWordService hashWordService;
+
     private final ObjectMapper objectMapper;
+
+    public CrackingHashTaskResultKafkaConsumer(
+        HashWordService hashWordService,
+        ObjectMapper objectMapper
+    ) {
+        this.hashWordService = hashWordService;
+        this.objectMapper = objectMapper;
+    }
 
     @KafkaListener(
         topics = "${crack-hash.kafka.consumer.topic}",
-        containerFactory = "kafkaListenerContainerFactory"
+        containerFactory = "crackHashTaskResultKafkaListenerContainerFactory"
     )
-    private void listenCrackHashTaskResultTopic(String body, Acknowledgment acknowledgment) {
-        var crackingHashResult = objectMapper.readValue(body, CrackHashTaskResultKafkaMessage.class);
-        acknowledgment.acknowledge();
+    private void listenCrackHashTaskResultTopic(String body) {
+        hashWordService.receiveCrackHashResult(
+            objectMapper.readValue(body, ReceiveCrackResultRequest.class)
+        );
     }
+
+    /*@PostConstruct
+    public void startConsume() {
+        Thread consumerThread = new Thread(this::singleThreadConsumeCrackingHashResult);
+        consumerThread.start();
+    }
+
+    @PreDestroy
+    public void stopConsume() {
+        isContinueConsumeResult = false;
+    }
+
+    private void singleThreadConsumeCrackingHashResult() {
+        while (isContinueConsumeResult) {
+            kafkaConsumer.poll(Duration.ofMillis(1000))
+                .forEach(record -> {
+                    hashWordService.receiveCrackHashResult(
+                        objectMapper.readValue(record.value(), ReceiveCrackResultRequest.class)
+                    );
+//                    kafkaConsumer.commitAsync(Duration.ofMillis(100));
+                });
+        }
+    }*/
 }

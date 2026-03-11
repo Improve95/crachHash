@@ -59,6 +59,8 @@ services:
     environment:
       WORKER_URL: http://crackhash_worker_service:8086
       MONGO_DB_HOST: crackhash_db_mongo
+      SEND_TYPE: kafka
+      WORKER_NUMBER: 2
     ports:
       - "8085:8085"
 

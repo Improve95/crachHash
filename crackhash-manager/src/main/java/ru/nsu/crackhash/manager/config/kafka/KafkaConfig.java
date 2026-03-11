@@ -35,6 +35,13 @@ public class KafkaConfig {
         return new KafkaTemplate<>(outboxProducerFactory);
     }
 
+    /*@Bean
+    public KafkaConsumer<String, String> crackHashKafkaConsumer() {
+        var props = crackHashKafkaProperties.consumer().config().buildProperties();
+
+        return new KafkaConsumer<>(props);
+    }*/
+
     @Bean
     public ConsumerFactory<String, String> crackHashConsumerFactory() {
         var props = crackHashKafkaProperties.consumer().config().buildProperties();
@@ -42,7 +49,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory(
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> crackHashTaskResultKafkaListenerContainerFactory(
         @Qualifier("crackHashConsumerFactory") ConsumerFactory<String, String> consumerFactory
     ) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =

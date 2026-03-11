@@ -6,5 +6,7 @@ services:
     container_name: "worker-service"
     environment:
       MANAGER_URL: http://crackhash_manager_service:8085
+      SEND_TYPE: kafka
+      WORKER_NUMBER: 2
     ports:
       - "8086:8086"

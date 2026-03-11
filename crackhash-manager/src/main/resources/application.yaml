@@ -21,10 +21,10 @@ spring:
     username: mongo_user
     password: mongo_password
 
-send-type: kafka
+send-type: ${SEND_TYPE:kafka}
 
 worker:
-  number: 2
+  number: ${WORKER_NUMBER:2}
 
 crack-hash:
   task:
