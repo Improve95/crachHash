@@ -34,6 +34,7 @@ public class HashCrackingServiceImpl implements HashCrackingService {
                         .withRepetitions(createCrackHashTaskRequest.maxLength())
                         .stream()
                         .skip(createCrackHashTaskRequest.partCount() * createCrackHashTaskRequest.partNumber())
+                        .limit(createCrackHashTaskRequest.partCount())
                         .map(wl -> String.join("", wl))
                         .filter(word -> {
                             String hash = cryptoService.hashingByMd5(word.getBytes(StandardCharsets.UTF_8));

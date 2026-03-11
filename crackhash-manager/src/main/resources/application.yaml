@@ -24,10 +24,10 @@ spring:
     representation:
       uuid: standard
 
-send-type: ${SEND_TYPE:rest}
+send-type: ${SEND_TYPE:kafka}
 
 worker:
-  number: ${WORKER_NUMBER:1}
+  number: ${WORKER_NUMBER:2}
 
 crack-hash:
   task:

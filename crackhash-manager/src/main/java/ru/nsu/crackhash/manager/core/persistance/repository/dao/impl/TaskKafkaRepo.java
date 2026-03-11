@@ -130,7 +130,9 @@ public class TaskKafkaRepo implements TaskRepo {
     @Override
     public void updateTaskRequest(UUID taskId, CrackingHashTask task) {
         Update update = new Update()
-            .set("status", task.getStatus());
+            .set("status", task.getStatus())
+            .set("taskPartCount", task.getTaskPartCount())
+            .set("startedAt", task.getStartedAt());
 
         FindAndModifyOptions options = new FindAndModifyOptions()
             .returnNew(true)
@@ -141,13 +143,13 @@ public class TaskKafkaRepo implements TaskRepo {
 
     private Query firstTaskInQueueQuery() {
         return new Query()
-            .with(Sort.by(Sort.Direction.DESC, "position"))
+            .with(Sort.by(Sort.Direction.ASC, "position"))
             .limit(1);
     }
 
     private Query lastTaskInQueueQuery() {
         return new Query()
-            .with(Sort.by(Sort.Direction.ASC, "position"))
+            .with(Sort.by(Sort.Direction.DESC, "position"))
             .limit(1);
     }
 
