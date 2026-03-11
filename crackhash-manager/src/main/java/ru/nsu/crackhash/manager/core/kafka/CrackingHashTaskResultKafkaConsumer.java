@@ -18,7 +18,7 @@ public class CrackingHashTaskResultKafkaConsumer {
 
     @KafkaListener(
         topics = "${crack-hash.kafka.consumer.topic}",
-        containerFactory = "crackHashConsumerFactory"
+        containerFactory = "kafkaListenerContainerFactory"
     )
     private void listenCrackHashTaskResultTopic(String body, Acknowledgment acknowledgment) {
         var crackingHashResult = objectMapper.readValue(body, CrackHashTaskResultKafkaMessage.class);

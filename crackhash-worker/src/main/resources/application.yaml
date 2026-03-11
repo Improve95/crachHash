@@ -10,7 +10,7 @@ spring:
       client:
         config:
           managerFeignClient:
-            url: http://localhost:8085
+            url: ${MANAGER_URL:http://localhost:8085}
 
 send-type: rest
 

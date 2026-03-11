@@ -10,19 +10,21 @@ spring:
       client:
         config:
           workerFeignClient:
-            url: http://localhost:8086
+            url: ${WORKER_URL:http://localhost:8086}
+            read-timeout: 500
+            connect-timeout: 500
 
   mongodb:
-    host: localhost
+    host: ${MONGO_DB_HOST:localhost}
     port: 27017
     database: crackhash_db_mongo
     username: mongo_user
     password: mongo_password
 
-send-type: rest
+send-type: kafka
 
 worker:
-  number: 1
+  number: 2
 
 crack-hash:
   task:
@@ -42,4 +44,5 @@ crack-hash:
         bootstrap-servers: localhost:9092
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        group-id: crackhash_task_result_group_id
       topic: crackhash_task_result_topic

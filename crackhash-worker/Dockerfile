@@ -1,6 +1,6 @@
 FROM gradle:9.0.0-jdk21 AS build
 
-WORKDIR /manager-service
+WORKDIR /worker-service
 
 COPY build.gradle .
 COPY settings.gradle .
@@ -15,8 +15,8 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=build /manager-service/build/libs/*.jar app.jar
+COPY --from=build /worker-service/build/libs/*.jar app.jar
 
-EXPOSE 8085
+EXPOSE 8086
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

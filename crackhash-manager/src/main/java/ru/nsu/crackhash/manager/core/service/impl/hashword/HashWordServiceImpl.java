@@ -11,7 +11,7 @@ import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
 import ru.nsu.crackhash.manager.core.service.CrackHashTaskDistributed;
-import ru.nsu.crackhash.manager.core.service.CrackingHashTaskService;
+import ru.nsu.crackhash.manager.core.service.CrackingTaskService;
 import ru.nsu.crackhash.manager.core.service.HashWordService;
 
 import java.time.Instant;
@@ -28,7 +28,7 @@ import static ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTaskSt
 @Service
 public class HashWordServiceImpl implements HashWordService {
 
-    private final CrackingHashTaskService crackingHashTaskService;
+    private final CrackingTaskService crackingTaskService;
 
     private final CrackHashTaskDistributed crackHashTaskDistributed;
 
@@ -37,7 +37,7 @@ public class HashWordServiceImpl implements HashWordService {
     @Override
     public StartCrackingHashProcessResponse startCrackHash(StartCrackingHashProcessRequest request) {
         UUID taskId = UUID.randomUUID();
-        List<CrackHashTaskWorkerRequest> tasksList = crackingHashTaskService.createCrackRequest(taskId, request);
+        List<CrackHashTaskWorkerRequest> tasksList = crackingTaskService.createCrackRequest(taskId, request);
 
         int queueSize = taskRepo.putInQueue(
             CrackingHashTask.builder()

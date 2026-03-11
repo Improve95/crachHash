@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+  crackhash_worker_service:
+    build:
+      dockerfile: Dockerfile
+    container_name: "worker-service"
+    environment:
+      MANAGER_URL: http://crackhash_manager_service:8085
+    ports:
+      - "8086:8086"

@@ -1,4 +1,4 @@
-package ru.nsu.crackhash.manager.core.service.impl.cracking;
+package ru.nsu.crackhash.manager.core.service.impl.hashword;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
 import ru.nsu.crackhash.manager.config.alphabet.AlphabetConfig;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
-import ru.nsu.crackhash.manager.core.service.CrackingHashTaskService;
+import ru.nsu.crackhash.manager.core.service.CrackingTaskService;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public class CrackingHashTaskServiceImpl implements CrackingHashTaskService {
+public class CrackingTaskServiceImpl implements CrackingTaskService {
 
     private final AlphabetConfig alphabetConfig;
 
