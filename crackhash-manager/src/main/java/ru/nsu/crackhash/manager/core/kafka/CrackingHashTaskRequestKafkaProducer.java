@@ -27,14 +27,21 @@ public class CrackingHashTaskRequestKafkaProducer {
             topic, objectMapper.writeValueAsString(message)
         );
 
-        sendResultCompletableFuture.thenAcceptAsync(sendResult ->
-            log.info(
-                "success sending crack hash task request to topic: {}, paritition: {}, requestId: {}, partNumber: {}",
-                topic,
-                sendResult.getRecordMetadata().partition(),
-                message.requestId(),
-                message.partNumber()
-            )
+        sendResultCompletableFuture
+            .handleAsync((sendResult, ex) -> {
+                if (ex != null) {
+                    throw new RuntimeException(ex);
+                }
+                return sendResult;
+            })
+            .thenAcceptAsync(sendResult ->
+                log.info(
+                    "success sending crack hash task request to topic: {}, paritition: {}, requestId: {}, partNumber: {}",
+                    topic,
+                    sendResult.getRecordMetadata().partition(),
+                    message.requestId(),
+                    message.partNumber()
+                )
         );
     }
 }

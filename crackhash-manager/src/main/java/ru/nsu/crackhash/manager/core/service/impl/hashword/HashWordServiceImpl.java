@@ -2,13 +2,14 @@ package ru.nsu.crackhash.manager.core.service.impl.hashword;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.manager.api.dto.GetCrackHashProcessStatusResponse;
 import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessResponse;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
-import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTask;
+import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
 import ru.nsu.crackhash.manager.core.service.CrackHashTaskDistributed;
 import ru.nsu.crackhash.manager.core.service.CrackingTaskService;
@@ -19,9 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTaskStatus.HALF_READY;
-import static ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTaskStatus.IN_PROGRESS;
-import static ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTaskStatus.READY;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.HALF_READY;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.IN_PROGRESS;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.READY;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class HashWordServiceImpl implements HashWordService {
         UUID taskId = UUID.randomUUID();
         List<CrackHashTaskWorkerRequest> tasksList = crackingTaskService.createCrackRequest(taskId, request);
 
-        int queueSize = taskRepo.putInQueue(
+        long queueSize = taskRepo.putInQueue(
             CrackingHashTask.builder()
                 .id(taskId)
                 .hash(request.hash())
@@ -52,9 +53,7 @@ public class HashWordServiceImpl implements HashWordService {
                 .build()
         );
 
-        if (queueSize == 1) {
-            distributeSend(tasksList);
-        }
+        runTaskFromQueue();
 
         return StartCrackingHashProcessResponse.builder()
             .requestId(taskId)
@@ -70,16 +69,36 @@ public class HashWordServiceImpl implements HashWordService {
 
         if (task.getTaskPartCount() == task.getCurrentCompletedTaskPartCount()) {
             taskRepo.removeFromQueue();
+
             task.setStatus(READY);
-            runTaskFromQueue();
+            taskRepo.updateTaskRequest(task.getId(), task);
         } else {
             task.setStatus(HALF_READY);
+            taskRepo.updateTaskRequest(task.getId(), task);
         }
+
+        runTaskFromQueue();
     }
 
     @Override
     public void distributeSend(List<CrackHashTaskWorkerRequest> tasksList) {
-        crackHashTaskDistributed.distributedSendCrackHashTasks(tasksList);
+        for (var task : tasksList) {
+            try {
+                crackHashTaskDistributed.distributedSendCrackHashTasks(task);
+                log.info(
+                    "success distribute send task request to worker with requestId: {}, partNumber: {}",
+                    task.requestId(),
+                    task.partNumber()
+                );
+            } catch (Exception ex) {
+                log.error(
+                    "failed distribute send task request to worker with requestId: {}, partNumber: {}, cause: {}",
+                    task.requestId(),
+                    task.partNumber(),
+                    ExceptionUtils.getRootCauseMessage(ex)
+                );
+            }
+        }
     }
 
     @Override

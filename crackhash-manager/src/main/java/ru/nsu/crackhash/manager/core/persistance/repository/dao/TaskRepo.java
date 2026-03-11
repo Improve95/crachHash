@@ -1,13 +1,13 @@
 package ru.nsu.crackhash.manager.core.persistance.repository.dao;
 
-import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTask;
+import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface TaskRepo {
 
-    int putInQueue(CrackingHashTask crackingHashTask);
+    long putInQueue(CrackingHashTask crackingHashTask);
 
     CrackingHashTask getFromQueue();
 
@@ -16,4 +16,6 @@ public interface TaskRepo {
     CrackingHashTask getTask(UUID taskId);
 
     void addAnswers(UUID taskId, List<String> answers);
+
+    void updateTaskRequest(UUID taskId, CrackingHashTask task);
 }

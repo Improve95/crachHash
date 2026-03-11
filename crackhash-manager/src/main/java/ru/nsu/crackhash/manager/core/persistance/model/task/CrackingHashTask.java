@@ -1,4 +1,4 @@
-package ru.nsu.crackhash.manager.core.persistance.model;
+package ru.nsu.crackhash.manager.core.persistance.model.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

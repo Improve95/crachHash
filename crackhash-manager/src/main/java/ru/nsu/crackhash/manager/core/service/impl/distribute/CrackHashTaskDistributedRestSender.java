@@ -8,8 +8,6 @@ import ru.nsu.crackhash.manager.core.feign.worker.WorkerFeignClient;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.service.CrackHashTaskDistributed;
 
-import java.util.List;
-
 @Slf4j
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "send-type", havingValue = "rest")
@@ -19,7 +17,7 @@ public class CrackHashTaskDistributedRestSender implements CrackHashTaskDistribu
     private final WorkerFeignClient workerFeignClient;
 
     @Override
-    public void distributedSendCrackHashTasks(List<CrackHashTaskWorkerRequest> requests) {
-        requests.forEach(workerFeignClient::createCrackHashTask);
+    public void distributedSendCrackHashTasks(CrackHashTaskWorkerRequest request) {
+        workerFeignClient.createCrackHashTask(request);
     }
 }

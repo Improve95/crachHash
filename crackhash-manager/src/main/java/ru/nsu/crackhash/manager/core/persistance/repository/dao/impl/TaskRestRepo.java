@@ -3,7 +3,7 @@ package ru.nsu.crackhash.manager.core.persistance.repository.dao.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import ru.nsu.crackhash.manager.core.persistance.model.CrackingHashTask;
+import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class TaskRestRepo implements TaskRepo {
     private final Map<UUID, Semaphore> taskSemaphoreMap = new ConcurrentHashMap<>();
 
     @Override
-    public int putInQueue(CrackingHashTask crackingHashTask) {
+    public long putInQueue(CrackingHashTask crackingHashTask) {
         crackingHashTaskMap.putIfAbsent(crackingHashTask.getId(), crackingHashTask);
         crackingHashQueue.add(crackingHashTask.getId());
         return crackingHashQueue.size();
@@ -36,14 +36,18 @@ public class TaskRestRepo implements TaskRepo {
     public CrackingHashTask getFromQueue() {
         UUID taskId = crackingHashQueue.peek();
         if (taskId != null) {
-            return crackingHashTaskMap.get(crackingHashQueue.peek());
+            return crackingHashTaskMap.get(taskId);
         }
         return null;
     }
 
     @Override
     public CrackingHashTask removeFromQueue() {
-        return crackingHashTaskMap.get(crackingHashQueue.poll());
+        UUID taskId = crackingHashQueue.poll();
+        if (taskId != null) {
+            return crackingHashTaskMap.get(taskId);
+        }
+        return null;
     }
 
     @Override
@@ -65,5 +69,10 @@ public class TaskRestRepo implements TaskRepo {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    @Override
+    public void updateTaskRequest(UUID taskId, CrackingHashTask task) {
+        crackingHashTaskMap.computeIfPresent(taskId, (k, v) -> v);
     }
 }

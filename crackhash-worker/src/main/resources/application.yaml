@@ -12,7 +12,7 @@ spring:
           managerFeignClient:
             url: ${MANAGER_URL:http://localhost:8085}
 
-send-type: ${SEND_TYPE:kafka}
+send-type: ${SEND_TYPE:rest}
 
 crack-hash:
   cracking-hash-thread-pool-size: ${CRACKING_HASH_THREAD_POOL_SIZE:10}
@@ -36,6 +36,6 @@ crack-hash:
         auto-offset-reset: earliest
         enable-auto-commit: false
       properties:
-        concurrency: ${WORKER_NUMBER:2}
+        concurrency: ${WORKER_NUMBER:1}
 
       topic: crackhash_task_request_topic
