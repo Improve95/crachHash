@@ -65,6 +65,9 @@ public class HashWordServiceImpl implements HashWordService {
     public void receiveCrackHashResult(ReceiveCrackResultRequest request) {
         taskRepo.addAnswers(request.taskId(), request.answers());
         CrackingHashTask task = taskRepo.getTask(request.taskId());
+
+        if (task == null) return;
+
         if (task.getTaskPartCount() == task.getCurrentCompletedTaskPartCount()) {
             taskRepo.removeFromQueue();
             task.setStatus(READY);

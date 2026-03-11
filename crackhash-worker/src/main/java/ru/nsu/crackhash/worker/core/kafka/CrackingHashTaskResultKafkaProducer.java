@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import ru.nsu.crackhash.worker.config.kafka.KafkaConfig;
-import ru.nsu.crackhash.worker.core.kafka.dto.CrackHashTaskResultMessage;
+import ru.nsu.crackhash.worker.core.feign.manager.dto.SendCrackResultRequest;
 import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class CrackingHashTaskResultKafkaProducer {
 
     private final ObjectMapper objectMapper;
 
-    public void sendCrackHashTaskResult(String topic, CrackHashTaskResultMessage message) {
-        kafkaTemplate.send(topic, objectMapper.writeValueAsString(message));
+    public void sendCrackHashTaskResult(String topic, SendCrackResultRequest request) {
+        kafkaTemplate.send(topic, objectMapper.writeValueAsString(request));
     }
 }

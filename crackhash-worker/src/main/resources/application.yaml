@@ -37,4 +37,5 @@ crack-hash:
         enable-auto-commit: false
       properties:
         concurrency: ${WORKER_NUMBER:2}
+
       topic: crackhash_task_request_topic

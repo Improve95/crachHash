@@ -24,7 +24,7 @@ spring:
 send-type: ${SEND_TYPE:kafka}
 
 worker:
-  number: ${WORKER_NUMBER:2}
+  number: ${WORKER_NUMBER:3}
 
 crack-hash:
   task:

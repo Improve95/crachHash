@@ -33,27 +33,4 @@ public class CrackingHashTaskResultKafkaConsumer {
             objectMapper.readValue(body, ReceiveCrackResultRequest.class)
         );
     }
-
-    /*@PostConstruct
-    public void startConsume() {
-        Thread consumerThread = new Thread(this::singleThreadConsumeCrackingHashResult);
-        consumerThread.start();
-    }
-
-    @PreDestroy
-    public void stopConsume() {
-        isContinueConsumeResult = false;
-    }
-
-    private void singleThreadConsumeCrackingHashResult() {
-        while (isContinueConsumeResult) {
-            kafkaConsumer.poll(Duration.ofMillis(1000))
-                .forEach(record -> {
-                    hashWordService.receiveCrackHashResult(
-                        objectMapper.readValue(record.value(), ReceiveCrackResultRequest.class)
-                    );
-//                    kafkaConsumer.commitAsync(Duration.ofMillis(100));
-                });
-        }
-    }*/
 }

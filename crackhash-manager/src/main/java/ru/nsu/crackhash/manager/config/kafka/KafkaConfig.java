@@ -1,12 +1,16 @@
 package ru.nsu.crackhash.manager.config.kafka;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -22,9 +26,17 @@ public class KafkaConfig {
 
     private final CrackHashKafkaProperties crackHashKafkaProperties;
 
+    @Value("${worker.number}")
+    private int crackhashRequestTopicPartitionNumber;
+
     @Bean
     public ProducerFactory<String, String> crackHashProducerFactory() {
         var props = crackHashKafkaProperties.producer().config().buildProperties();
+        props.put(
+            ProducerConfig.PARTITIONER_CLASS_CONFIG,
+            org.apache.kafka.clients.producer.RoundRobinPartitioner.class
+        );
+
         return new DefaultKafkaProducerFactory<>(props);
     }
 
@@ -35,12 +47,14 @@ public class KafkaConfig {
         return new KafkaTemplate<>(outboxProducerFactory);
     }
 
-    /*@Bean
-    public KafkaConsumer<String, String> crackHashKafkaConsumer() {
-        var props = crackHashKafkaProperties.consumer().config().buildProperties();
-
-        return new KafkaConsumer<>(props);
-    }*/
+    @Bean
+    public NewTopic crackhashTaskRequestTopic() {
+        return TopicBuilder
+            .name(crackHashKafkaProperties.producer().topic())
+            .partitions(crackhashRequestTopicPartitionNumber)
+            .replicas(1)
+            .build();
+    }
 
     @Bean
     public ConsumerFactory<String, String> crackHashConsumerFactory() {

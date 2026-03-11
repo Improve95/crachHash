@@ -21,6 +21,8 @@ public class KafkaResultServiceImpl implements ResultService {
 
     @Override
     public void sendResultToManager(SendCrackResultRequest sendCrackResultRequest) {
-
+        crackingHashTaskResultKafkaProducer.sendCrackHashTaskResult(
+            crackHashResultTopic, sendCrackResultRequest
+        );
     }
 }

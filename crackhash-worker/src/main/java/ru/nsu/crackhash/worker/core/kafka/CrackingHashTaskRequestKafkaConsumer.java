@@ -6,7 +6,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import ru.nsu.crackhash.worker.config.kafka.KafkaConfig;
 import ru.nsu.crackhash.worker.core.kafka.dto.CrackHashTaskRequestKafkaMessage;
@@ -33,10 +32,7 @@ public class CrackingHashTaskRequestKafkaConsumer {
         containerFactory = "crackHashTaskRequestKafkaListenerContainerFactory",
         concurrency = "${crack-hash.kafka.consumer.properties.concurrency}"
     )
-    private void listenCrackHashTaskResultTopic(
-        ConsumerRecord<String, String> consumerRecord,
-        Acknowledgment ack
-    ) {
+    private void listenCrackHashTaskResultTopic(ConsumerRecord<String, String> consumerRecord) {
         var crackingHashRequestMessage = objectMapper.readValue(
             consumerRecord.value(), CrackHashTaskRequestKafkaMessage.class
         );
@@ -66,10 +62,6 @@ public class CrackingHashTaskRequestKafkaConsumer {
                 consumerRecord.offset(),
                 ExceptionUtils.getRootCauseMessage(ex)
             );
-        }
-
-        if (isComplete) {
-            ack.acknowledge();
         }
     }
 }

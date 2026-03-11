@@ -47,8 +47,6 @@ public class HashCrackingServiceImpl implements HashCrackingService {
                             .answers(answers)
                             .build()
                     );
-
-                    log.info("success cracking hash task, id: {}", createCrackHashTaskRequest.requestId());
                     return true;
                 } catch (Exception ex) {
                     log.error(
