@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 import ru.nsu.crackhash.manager.config.kafka.KafkaConfig;
 import ru.nsu.crackhash.manager.core.persistance.model.queue.CrackHashTaskQueue;
 import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
+import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
 
 import java.util.List;
@@ -63,7 +66,30 @@ public class TaskKafkaRepo implements TaskRepo {
 
     @Override
     public CrackingHashTask getFirstWaitingTask() {
-        return null;
+        Aggregation aggregation = Aggregation.newAggregation(
+            Aggregation.sort(Sort.by("position")),
+            Aggregation.lookup(
+                "cracking_hash_tasks",
+                "taskId",
+                "_id",
+                "task"
+            ),
+            Aggregation.unwind("task"),
+            Aggregation.match(
+                Criteria.where("task.status").is(CrackingHashTaskStatus.WAITING)
+            ),
+            Aggregation.replaceRoot("task"),
+            Aggregation.limit(1)
+        );
+
+        AggregationResults<CrackingHashTask> results =
+            mongoTemplate.aggregate(
+                aggregation,
+                "cracking_hash_tasks_queue",
+                CrackingHashTask.class
+            );
+
+        return results.getUniqueMappedResult();
     }
 
     @Override
