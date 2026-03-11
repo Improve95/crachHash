@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.FAILED;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.HALF_READY;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.IN_PROGRESS;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.READY;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.WAITING;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,19 +38,18 @@ public class HashWordServiceImpl implements HashWordService {
     private final TaskRepo taskRepo;
 
     @Override
-    public StartCrackingHashProcessResponse startCrackHash(StartCrackingHashProcessRequest request) {
+    public StartCrackingHashProcessResponse addCrackHashTaskInQueue(StartCrackingHashProcessRequest request) {
         UUID taskId = UUID.randomUUID();
-        List<CrackHashTaskWorkerRequest> tasksList = crackingTaskService.createCrackRequest(taskId, request);
 
-        long queueSize = taskRepo.putInQueue(
+        taskRepo.putInQueue(
             CrackingHashTask.builder()
                 .id(taskId)
                 .hash(request.hash())
                 .maxLength(request.maxLength())
-                .status(IN_PROGRESS)
+                .status(WAITING)
                 .currentCompletedTaskPartCount(0)
-                .taskPartCount(tasksList.size())
-                .startedAt(Instant.now())
+                .taskPartCount(-1)
+                .startedAt(null)
                 .answers(new ArrayList<>())
                 .build()
         );
@@ -68,8 +69,6 @@ public class HashWordServiceImpl implements HashWordService {
         if (task == null) return;
 
         if (task.getTaskPartCount() == task.getCurrentCompletedTaskPartCount()) {
-            taskRepo.removeFromQueue();
-
             task.setStatus(READY);
             taskRepo.updateTaskRequest(task.getId(), task);
         } else {
@@ -78,27 +77,6 @@ public class HashWordServiceImpl implements HashWordService {
         }
 
         runTaskFromQueue();
-    }
-
-    @Override
-    public void distributeSend(List<CrackHashTaskWorkerRequest> tasksList) {
-        for (var task : tasksList) {
-            try {
-                crackHashTaskDistributed.distributedSendCrackHashTasks(task);
-                log.info(
-                    "success distribute send task request to worker with requestId: {}, partNumber: {}",
-                    task.requestId(),
-                    task.partNumber()
-                );
-            } catch (Exception ex) {
-                log.error(
-                    "failed distribute send task request to worker with requestId: {}, partNumber: {}, cause: {}",
-                    task.requestId(),
-                    task.partNumber(),
-                    ExceptionUtils.getRootCauseMessage(ex)
-                );
-            }
-        }
     }
 
     @Override
@@ -116,14 +94,52 @@ public class HashWordServiceImpl implements HashWordService {
     }
 
     private void runTaskFromQueue() {
-        CrackingHashTask crackingHashTask = taskRepo.getFromQueue();
+        CrackingHashTask crackingHashTask = taskRepo.getFirstWaitingTask();
         if (crackingHashTask != null) {
-            startCrackHash(
-                StartCrackingHashProcessRequest.builder()
-                    .hash(crackingHashTask.getHash())
-                    .maxLength(crackingHashTask.getMaxLength())
-                    .build()
+
+            var request = StartCrackingHashProcessRequest.builder()
+                .hash(crackingHashTask.getHash())
+                .maxLength(crackingHashTask.getMaxLength())
+                .build();
+
+            List<CrackHashTaskWorkerRequest> workerRequests = crackingTaskService.createCrackRequest(
+                crackingHashTask.getId(), request
             );
+
+            crackingHashTask.setStatus(IN_PROGRESS);
+            crackingHashTask.setTaskPartCount(workerRequests.size());
+            crackingHashTask.setStartedAt(Instant.now());
+            taskRepo.updateTaskRequest(crackingHashTask.getId(), crackingHashTask);
+
+            distributeSend(workerRequests);
+        }
+    }
+
+    private void distributeSend(List<CrackHashTaskWorkerRequest> workerRequests) {
+        int successSend = 0;
+        for (var workerRequest : workerRequests) {
+            try {
+                crackHashTaskDistributed.distributedSendCrackHashTasks(workerRequest);
+                successSend++;
+                log.info(
+                    "success distribute send task request to worker with requestId: {}, partNumber: {}",
+                    workerRequest.requestId(),
+                    workerRequest.partNumber()
+                );
+            } catch (Exception ex) {
+                log.error(
+                    "failed distribute send task request to worker with requestId: {}, partNumber: {}, cause: {}",
+                    workerRequest.requestId(),
+                    workerRequest.partNumber(),
+                    ExceptionUtils.getRootCauseMessage(ex)
+                );
+            }
+        }
+
+        if (successSend == 0) {
+            var task = taskRepo.getTask(workerRequests.getFirst().requestId());
+            task.setStatus(FAILED);
+            taskRepo.updateTaskRequest(task.getId(), task);
         }
     }
 }

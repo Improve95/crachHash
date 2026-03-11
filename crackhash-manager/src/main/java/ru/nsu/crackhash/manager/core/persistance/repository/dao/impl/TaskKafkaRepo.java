@@ -62,6 +62,11 @@ public class TaskKafkaRepo implements TaskRepo {
     }
 
     @Override
+    public CrackingHashTask getFirstWaitingTask() {
+        return null;
+    }
+
+    @Override
     public CrackingHashTask removeFromQueue() {
         CrackHashTaskQueue crackHashTaskQueue = mongoTemplate.findAndRemove(
             firstTaskInQueueQuery(),

@@ -13,6 +13,8 @@ public interface TaskRepo {
 
     CrackingHashTask removeFromQueue();
 
+    CrackingHashTask getFirstWaitingTask();
+
     CrackingHashTask getTask(UUID taskId);
 
     void addAnswers(UUID taskId, List<String> answers);

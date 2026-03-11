@@ -28,7 +28,7 @@ public class CrackHashController {
     public ResponseEntity<StartCrackingHashProcessResponse> findWord(
         @RequestBody StartCrackingHashProcessRequest startCrackingHashProcessRequest
     ) {
-        var response = hashWordService.startCrackHash(startCrackingHashProcessRequest);
+        var response = hashWordService.addCrackHashTaskInQueue(startCrackingHashProcessRequest);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

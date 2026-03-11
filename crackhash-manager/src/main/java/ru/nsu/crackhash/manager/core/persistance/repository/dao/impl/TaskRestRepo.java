@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Semaphore;
 
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.WAITING;
+
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "send-type", havingValue = "rest")
 @Component
@@ -48,6 +50,15 @@ public class TaskRestRepo implements TaskRepo {
             return crackingHashTaskMap.get(taskId);
         }
         return null;
+    }
+
+    @Override
+    public CrackingHashTask getFirstWaitingTask() {
+        return crackingHashQueue.stream()
+            .filter(taskId -> crackingHashTaskMap.get(taskId).getStatus().equals(WAITING))
+            .findFirst()
+            .map(crackingHashTaskMap::get)
+            .orElse(null);
     }
 
     @Override
