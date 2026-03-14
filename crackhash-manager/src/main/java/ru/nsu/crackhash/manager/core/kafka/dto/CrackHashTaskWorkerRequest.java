@@ -7,10 +7,10 @@ import java.util.UUID;
 
 @Builder
 public record CrackHashTaskWorkerRequest(
-    UUID requestId,
+    String hash,
+    List<String> alphabet,
+    int maxLength,
     int partNumber,
     long partCount,
-    String hash,
-    int maxLength,
-    List<String> alphabet
+    UUID requestId
 ) {}

@@ -27,37 +27,38 @@ public class HashCrackingServiceImpl implements HashCrackingService {
     @Async("crackHashThreadPoolExecutor")
     @Override
     public CompletableFuture<Boolean> createCrackHashTask(CreateCrackHashTaskRequest createCrackHashTaskRequest) {
-        return CompletableFuture.supplyAsync(
-            () -> {
-                try {
-                    var answers = Generator.permutation(createCrackHashTaskRequest.alphabet())
-                        .withRepetitions(createCrackHashTaskRequest.maxLength())
-                        .stream()
-                        .skip(createCrackHashTaskRequest.partCount() * createCrackHashTaskRequest.partNumber())
-                        .limit(createCrackHashTaskRequest.partCount())
-                        .map(wl -> String.join("", wl))
-                        .filter(word -> {
-                            String hash = cryptoService.hashingByMd5(word.getBytes(StandardCharsets.UTF_8));
-                            return createCrackHashTaskRequest.hash().equals(hash);
-                        })
-                        .toList();
+        try {
+            var answers = Generator.permutation(createCrackHashTaskRequest.alphabet())
+                .withRepetitions(createCrackHashTaskRequest.maxLength())
+                .stream()
+                .skip(createCrackHashTaskRequest.partCount() * createCrackHashTaskRequest.partNumber())
+                .limit(createCrackHashTaskRequest.partCount())
+                .map(wl -> String.join("", wl))
+                .filter(word -> {
+                    String hash = cryptoService.hashingByMd5(word.getBytes(StandardCharsets.UTF_8));
+                    return createCrackHashTaskRequest.hash().equals(hash);
+                })
+                .toList();
 
-                    resultService.sendResultToManager(
-                        SendCrackResultRequest.builder()
-                            .taskId(createCrackHashTaskRequest.requestId())
-                            .answers(answers)
-                            .build()
-                    );
-                    return true;
-                } catch (Exception ex) {
-                    log.error(
-                        "failed cracking hash task, id: {} {}",
-                        createCrackHashTaskRequest.requestId(),
-                        ExceptionUtils.getRootCauseMessage(ex)
-                    );
-                    return false;
-                }
-            }
-        );
+            resultService.sendResultToManager(
+                SendCrackResultRequest.builder()
+                    .taskId(createCrackHashTaskRequest.requestId())
+                    .answers(answers)
+                    .build()
+            );
+
+            log.info(
+                "success cracking hash task, id: {}",
+                createCrackHashTaskRequest.requestId()
+            );
+            return CompletableFuture.completedFuture(true);
+        } catch (Exception ex) {
+            log.error(
+                "failed cracking hash task, id: {}, cause: {}",
+                createCrackHashTaskRequest.requestId(),
+                ExceptionUtils.getRootCauseMessage(ex)
+            );
+            return CompletableFuture.completedFuture(false);
+        }
     }
 }

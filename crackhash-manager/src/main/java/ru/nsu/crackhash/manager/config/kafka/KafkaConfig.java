@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +17,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import ru.nsu.crackhash.manager.config.kafka.properties.CrackHashKafkaProperties;
+import ru.nsu.crackhash.manager.config.kafka.worker.WorkerConfig;
 
 @ConditionalOnProperty(name = "send-type", havingValue = "kafka")
 @RequiredArgsConstructor
@@ -26,8 +26,7 @@ public class KafkaConfig {
 
     private final CrackHashKafkaProperties crackHashKafkaProperties;
 
-    @Value("${worker.number}")
-    private int crackhashRequestTopicPartitionNumber;
+    private final WorkerConfig workerConfig;
 
     @Bean
     public ProducerFactory<String, String> crackHashProducerFactory() {
@@ -36,7 +35,6 @@ public class KafkaConfig {
             ProducerConfig.PARTITIONER_CLASS_CONFIG,
             org.apache.kafka.clients.producer.RoundRobinPartitioner.class
         );
-
         return new DefaultKafkaProducerFactory<>(props);
     }
 
@@ -51,7 +49,7 @@ public class KafkaConfig {
     public NewTopic crackhashTaskRequestTopic() {
         return TopicBuilder
             .name(crackHashKafkaProperties.producer().topic())
-            .partitions(crackhashRequestTopicPartitionNumber)
+            .partitions(workerConfig.number())
             .replicas(1)
             .build();
     }

@@ -7,9 +7,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import ru.nsu.crackhash.worker.api.dto.CreateCrackHashTaskRequest;
 import ru.nsu.crackhash.worker.config.kafka.KafkaConfig;
-import ru.nsu.crackhash.worker.core.kafka.dto.CrackHashTaskRequestKafkaMessage;
-import ru.nsu.crackhash.worker.core.mapper.CrackHashRequestDtoMapper;
 import ru.nsu.crackhash.worker.core.service.HashCrackingService;
 import tools.jackson.databind.ObjectMapper;
 
@@ -23,8 +22,6 @@ public class CrackingHashTaskRequestKafkaConsumer {
 
     private final HashCrackingService hashCrackingService;
 
-    private final CrackHashRequestDtoMapper crackHashRequestDtoMapper;
-
     private final ObjectMapper objectMapper;
 
     @KafkaListener(
@@ -33,20 +30,18 @@ public class CrackingHashTaskRequestKafkaConsumer {
         concurrency = "${crack-hash.kafka.consumer.properties.concurrency}"
     )
     private void listenCrackHashTaskResultTopic(ConsumerRecord<String, String> consumerRecord) {
-        var crackingHashRequestMessage = objectMapper.readValue(
-            consumerRecord.value(), CrackHashTaskRequestKafkaMessage.class
+        var createCrackHashTaskRequest = objectMapper.readValue(
+            consumerRecord.value(), CreateCrackHashTaskRequest.class
         );
 
-        var isCompleteFuture = hashCrackingService.createCrackHashTask(
-            crackHashRequestDtoMapper.toCreateCrackHashTaskRequest(crackingHashRequestMessage)
-        );
+        var isCompleteFuture = hashCrackingService.createCrackHashTask(createCrackHashTaskRequest);
 
         boolean isComplete = true;
         try {
             isComplete = isCompleteFuture.get(5000, TimeUnit.MILLISECONDS);
             log.info(
                 "success cracking hash with requestId: {}, key: {}, topic: {}, partition: {}, offset: {}",
-                crackingHashRequestMessage.requestId(),
+                createCrackHashTaskRequest.requestId(),
                 consumerRecord.key(),
                 consumerRecord.topic(),
                 consumerRecord.partition(),
@@ -55,7 +50,7 @@ public class CrackingHashTaskRequestKafkaConsumer {
         } catch (Exception ex) {
             log.error(
                 "failed cracking hash with requestId: {}, key: {}, topic: {}, partition: {}, offset: {}, cause: {}",
-                crackingHashRequestMessage.requestId(),
+                createCrackHashTaskRequest.requestId(),
                 consumerRecord.key(),
                 consumerRecord.topic(),
                 consumerRecord.partition(),
