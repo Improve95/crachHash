@@ -3,17 +3,24 @@ package ru.nsu.crackhash.manager.core.persistance.repository.dao.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import ru.nsu.crackhash.manager.config.kafka.task.TaskProperties;
 import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
+import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.FAILED;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.HALF_READY;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.IN_PROGRESS;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.READY;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.WAITING;
 
 @RequiredArgsConstructor
@@ -25,7 +32,9 @@ public class TaskRestRepo implements TaskRepo {
 
     private final Map<UUID, CrackingHashTask> crackingHashTaskMap = new ConcurrentHashMap<>();
 
-    private final Map<UUID, Semaphore> taskSemaphoreMap = new ConcurrentHashMap<>();
+    private final Map<UUID, ReentrantLock> mutexMap = new ConcurrentHashMap<>();
+
+    private final TaskProperties taskProperties;
 
     @Override
     public long putInQueue(CrackingHashTask crackingHashTask) {
@@ -34,7 +43,7 @@ public class TaskRestRepo implements TaskRepo {
         return crackingHashQueue.size();
     }
 
-    @Override
+    /*@Override
     public CrackingHashTask getFromQueue() {
         UUID taskId = crackingHashQueue.peek();
         if (taskId != null) {
@@ -50,15 +59,36 @@ public class TaskRestRepo implements TaskRepo {
             return crackingHashTaskMap.get(taskId);
         }
         return null;
+    }*/
+
+    @Override
+    public void markHungTask() {
+        for (UUID taskId : crackingHashQueue) {
+            CrackingHashTask task = crackingHashTaskMap.get(taskId);
+            CrackingHashTaskStatus status = task.getStatus();
+            Instant startedAt = task.getStartedAt();
+            if (status == IN_PROGRESS &&
+                    startedAt.isBefore(Instant.now().minus(taskProperties.inProcessLifetimeDurationThreshold())) ||
+                status == HALF_READY &&
+                    startedAt.isBefore(Instant.now().minus(taskProperties.halfReadyLifetimeDurationThreshold()))) {
+                task.setStatus(FAILED);
+            }
+        }
     }
 
     @Override
     public CrackingHashTask getFirstWaitingTask() {
-        return crackingHashQueue.stream()
-            .filter(taskId -> crackingHashTaskMap.get(taskId).getStatus().equals(WAITING))
-            .findFirst()
-            .map(crackingHashTaskMap::get)
-            .orElse(null);
+        for (UUID taskId : crackingHashQueue) {
+            CrackingHashTask crackingHashTask = crackingHashTaskMap.get(taskId);
+            if (crackingHashTask.getStatus() == WAITING) {
+                return crackingHashTask;
+            } else if (crackingHashTask.getStatus() == READY) {
+                continue;
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -68,22 +98,22 @@ public class TaskRestRepo implements TaskRepo {
 
     @Override
     public void addAnswers(UUID taskId, List<String> newAnswers) {
-        var taskSemaphore = taskSemaphoreMap.computeIfAbsent(taskId, k -> new Semaphore(1));
+        var mutex = mutexMap.computeIfAbsent(taskId, k -> new ReentrantLock());
         try {
-            taskSemaphore.acquire();
+            mutex.lock();
             var task = crackingHashTaskMap.get(taskId);
             if (task != null) {
                 task.getAnswers().addAll(newAnswers);
                 task.setCurrentCompletedTaskPartCount(task.getCurrentCompletedTaskPartCount() + 1);
             }
-            taskSemaphore.release();
+            mutex.unlock();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
     @Override
-    public void updateTaskRequest(UUID taskId, CrackingHashTask task) {
+    public void update(UUID taskId, CrackingHashTask task) {
         crackingHashTaskMap.computeIfPresent(taskId, (k, v) -> v);
     }
 }

@@ -23,24 +23,19 @@ public class CrackingTaskServiceImpl implements CrackingTaskService {
 
     @Override
     public List<CrackHashTaskWorkerRequest> createCrackRequest(UUID taskId, StartCrackingHashProcessRequest request) {
-        int workersNumber = workerConfig.number();
-
         BigInteger bigInteger = BigInteger.valueOf(alphabetConfig.getAlphabet().size());
         bigInteger = bigInteger.pow(request.maxLength());
         long potentialWordsCount = bigInteger.longValue();
 
+        int workersNumber = workerConfig.number();
         long wordsPerWorker = potentialWordsCount / workersNumber;
-
         List<CrackHashTaskWorkerRequest> crackHashTaskWorkerRequests = new ArrayList<>();
         for (int i = 0; i < workersNumber; i++) {
-            long partCount = wordsPerWorker +
-                (i == workersNumber - 1 ? potentialWordsCount % workersNumber : 0);
-
             crackHashTaskWorkerRequests.add(
                 CrackHashTaskWorkerRequest.builder()
                     .requestId(taskId)
                     .partNumber(i)
-                    .partCount(partCount)
+                    .partCount(wordsPerWorker)
                     .hash(request.hash())
                     .maxLength(request.maxLength())
                     .alphabet(alphabetConfig.getAlphabet())

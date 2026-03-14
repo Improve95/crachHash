@@ -12,11 +12,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 import ru.nsu.crackhash.manager.config.kafka.KafkaConfig;
+import ru.nsu.crackhash.manager.config.kafka.task.TaskProperties;
 import ru.nsu.crackhash.manager.core.persistance.model.queue.CrackHashTaskQueue;
 import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +28,8 @@ import java.util.UUID;
 public class TaskKafkaRepo implements TaskRepo {
 
     private final MongoTemplate mongoTemplate;
+
+    private final TaskProperties taskProperties;
 
     @Override
     public long putInQueue(CrackingHashTask crackingHashTask) {
@@ -51,17 +55,27 @@ public class TaskKafkaRepo implements TaskRepo {
     }
 
     @Override
-    public CrackingHashTask getFromQueue() {
-        CrackHashTaskQueue crackHashTaskQueue = mongoTemplate.findOne(
-            firstTaskInQueueQuery(),
-            CrackHashTaskQueue.class
+    public void markHungTask() {
+        Instant now = Instant.now();
+
+        Criteria inProgressStale = Criteria.where("status").is(CrackingHashTaskStatus.IN_PROGRESS)
+            .and("startedAt").lt(now.minus(taskProperties.inProcessLifetimeDurationThreshold()));
+
+        Criteria halfReadyStale = Criteria.where("status").is(CrackingHashTaskStatus.HALF_READY)
+            .and("startedAt").lt(now.minus(taskProperties.halfReadyLifetimeDurationThreshold()));
+
+        Query query = new Query(
+            new Criteria().orOperator(
+                inProgressStale,
+                halfReadyStale
+            )
         );
 
-        if (crackHashTaskQueue != null) {
-            return getTask(crackHashTaskQueue.getTaskId());
-        }
+        Update update = new Update()
+            .set("status", CrackingHashTaskStatus.FAILED);
 
-        return null;
+        mongoTemplate.updateMulti(query, update, CrackingHashTask.class)
+            .getModifiedCount();
     }
 
     @Override
@@ -93,20 +107,6 @@ public class TaskKafkaRepo implements TaskRepo {
     }
 
     @Override
-    public CrackingHashTask removeFromQueue() {
-        CrackHashTaskQueue crackHashTaskQueue = mongoTemplate.findAndRemove(
-            firstTaskInQueueQuery(),
-            CrackHashTaskQueue.class
-        );
-
-        if (crackHashTaskQueue != null) {
-            return getTask(crackHashTaskQueue.getTaskId());
-        }
-
-        return null;
-    }
-
-    @Override
     public CrackingHashTask getTask(UUID taskId) {
         return mongoTemplate.findOne(
             taskByUuidQuery(taskId),
@@ -128,7 +128,7 @@ public class TaskKafkaRepo implements TaskRepo {
     }
 
     @Override
-    public void updateTaskRequest(UUID taskId, CrackingHashTask task) {
+    public void update(UUID taskId, CrackingHashTask task) {
         Update update = new Update()
             .set("status", task.getStatus())
             .set("taskPartCount", task.getTaskPartCount())

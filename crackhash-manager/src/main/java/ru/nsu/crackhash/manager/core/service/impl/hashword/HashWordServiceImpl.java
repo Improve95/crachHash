@@ -70,10 +70,10 @@ public class HashWordServiceImpl implements HashWordService {
 
         if (task.getTaskPartCount() == task.getCurrentCompletedTaskPartCount()) {
             task.setStatus(READY);
-            taskRepo.updateTaskRequest(task.getId(), task);
+            taskRepo.update(task.getId(), task);
         } else {
             task.setStatus(HALF_READY);
-            taskRepo.updateTaskRequest(task.getId(), task);
+            taskRepo.update(task.getId(), task);
         }
 
         runTaskFromQueue();
@@ -94,9 +94,9 @@ public class HashWordServiceImpl implements HashWordService {
     }
 
     private void runTaskFromQueue() {
+        taskRepo.markHungTask();
         CrackingHashTask crackingHashTask = taskRepo.getFirstWaitingTask();
         if (crackingHashTask != null) {
-
             var request = StartCrackingHashProcessRequest.builder()
                 .hash(crackingHashTask.getHash())
                 .maxLength(crackingHashTask.getMaxLength())
@@ -109,7 +109,7 @@ public class HashWordServiceImpl implements HashWordService {
             crackingHashTask.setStatus(IN_PROGRESS);
             crackingHashTask.setTaskPartCount(workerRequests.size());
             crackingHashTask.setStartedAt(Instant.now());
-            taskRepo.updateTaskRequest(crackingHashTask.getId(), crackingHashTask);
+            taskRepo.update(crackingHashTask.getId(), crackingHashTask);
 
             distributeSend(workerRequests);
         }
@@ -139,7 +139,7 @@ public class HashWordServiceImpl implements HashWordService {
         if (successSend == 0) {
             var task = taskRepo.getTask(workerRequests.getFirst().requestId());
             task.setStatus(FAILED);
-            taskRepo.updateTaskRequest(task.getId(), task);
+            taskRepo.update(task.getId(), task);
         }
     }
 }

@@ -36,4 +36,6 @@ public class CrackingHashTask {
     private CrackingHashTaskStatus status;
 
     private Instant startedAt;
+
+    private Instant completedAt;
 }

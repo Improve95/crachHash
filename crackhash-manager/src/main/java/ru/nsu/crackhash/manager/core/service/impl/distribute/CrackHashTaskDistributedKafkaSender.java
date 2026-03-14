@@ -10,8 +10,6 @@ import ru.nsu.crackhash.manager.core.kafka.CrackingHashTaskRequestKafkaProducer;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.service.CrackHashTaskDistributed;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @Primary
 @ConditionalOnBean(KafkaConfig.class)
@@ -25,6 +23,6 @@ public class CrackHashTaskDistributedKafkaSender implements CrackHashTaskDistrib
 
     @Override
     public void distributedSendCrackHashTasks(CrackHashTaskWorkerRequest request) {
-//        crackingHashTaskRequestKafkaProducer.sendCrackHashTask(crackHashTaskRequestTopic, requests);
+        crackingHashTaskRequestKafkaProducer.sendCrackHashTask(crackHashTaskRequestTopic, request);
     }
 }

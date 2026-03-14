@@ -9,9 +9,7 @@ public interface TaskRepo {
 
     long putInQueue(CrackingHashTask crackingHashTask);
 
-    CrackingHashTask getFromQueue();
-
-    CrackingHashTask removeFromQueue();
+    void markHungTask();
 
     CrackingHashTask getFirstWaitingTask();
 
@@ -19,5 +17,5 @@ public interface TaskRepo {
 
     void addAnswers(UUID taskId, List<String> answers);
 
-    void updateTaskRequest(UUID taskId, CrackingHashTask task);
+    void update(UUID taskId, CrackingHashTask task);
 }
