@@ -8,20 +8,14 @@ import java.security.MessageDigest;
 @Service
 public class CryptoService {
 
-    private final MessageDigest md;
-
-    public CryptoService() throws Exception {
-        this.md = MessageDigest.getInstance("MD5");
-    }
-
     public String hashingByMd5(byte[] plainTextBytes) {
-        byte[] messageDigest = md.digest(plainTextBytes);
-
-        BigInteger no = new BigInteger(1, messageDigest);
-        String hashtext = no.toString(16);
-        while (hashtext.length() < 32) {
-            hashtext = "0" + hashtext;
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md5.digest(plainTextBytes);
+            BigInteger bigInt = new BigInteger(1, messageDigest);
+            return String.format("%032x", bigInt);
+        } catch (Exception ex) {
+            throw new RuntimeException();
         }
-        return hashtext;
     }
 }

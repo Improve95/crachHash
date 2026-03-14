@@ -21,8 +21,8 @@ worker:
   number: ${WORKER_NUMBER:3}
   urls:
     - ${WORKER_URL_1:http://localhost:8086}
-    - ${WORKER_URL_2:http://localhost:8087}
-    - ${WORKER_URL_3:http://localhost:8088}
+    - ${WORKER_URL_2:http://localhost:8086}
+    - ${WORKER_URL_3:http://localhost:8086}
 
 crack-hash:
   task:
