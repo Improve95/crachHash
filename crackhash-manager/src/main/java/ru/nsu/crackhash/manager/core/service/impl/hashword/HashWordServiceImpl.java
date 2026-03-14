@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.FAILED;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.HALF_READY;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.IN_PROGRESS;
 import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.READY;
@@ -68,6 +67,7 @@ public class HashWordServiceImpl implements HashWordService {
 
         if (task == null) return;
 
+        task.setUpdatedAt(Instant.now());
         if (task.getTaskPartCount() == task.getCurrentCompletedTaskPartCount()) {
             task.setStatus(READY);
             taskRepo.update(task.getId(), task);
@@ -86,6 +86,8 @@ public class HashWordServiceImpl implements HashWordService {
         if (crackingHashTask == null) {
             return null;
         }
+
+        runTaskFromQueue();
 
         return GetCrackHashProcessStatusResponse.builder()
             .crackingHashTaskStatus(crackingHashTask.getStatus())
@@ -109,13 +111,19 @@ public class HashWordServiceImpl implements HashWordService {
             crackingHashTask.setStatus(IN_PROGRESS);
             crackingHashTask.setTaskPartCount(workerRequests.size());
             crackingHashTask.setStartedAt(Instant.now());
+            crackingHashTask.setUpdatedAt(Instant.now());
             taskRepo.update(crackingHashTask.getId(), crackingHashTask);
 
-            distributeSend(workerRequests);
+            int successSend = distributeSend(workerRequests);
+            if (successSend == 0) {
+                var task = taskRepo.getTask(workerRequests.getFirst().requestId());
+                task.setStatus(WAITING);
+                taskRepo.update(task.getId(), task);
+            }
         }
     }
 
-    private void distributeSend(List<CrackHashTaskWorkerRequest> workerRequests) {
+    private int distributeSend(List<CrackHashTaskWorkerRequest> workerRequests) {
         int successSend = 0;
         for (var workerRequest : workerRequests) {
             try {
@@ -135,11 +143,6 @@ public class HashWordServiceImpl implements HashWordService {
                 );
             }
         }
-
-        if (successSend == 0) {
-            var task = taskRepo.getTask(workerRequests.getFirst().requestId());
-            task.setStatus(FAILED);
-            taskRepo.update(task.getId(), task);
-        }
+        return successSend;
     }
 }

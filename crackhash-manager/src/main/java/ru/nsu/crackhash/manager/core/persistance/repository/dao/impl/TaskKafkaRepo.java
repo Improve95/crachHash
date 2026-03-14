@@ -59,10 +59,10 @@ public class TaskKafkaRepo implements TaskRepo {
         Instant now = Instant.now();
 
         Criteria inProgressStale = Criteria.where("status").is(CrackingHashTaskStatus.IN_PROGRESS)
-            .and("startedAt").lt(now.minus(taskProperties.inProcessLifetimeDurationThreshold()));
+            .and("updatedAt").lt(now.minus(taskProperties.inProcessLifetimeDurationThreshold()));
 
         Criteria halfReadyStale = Criteria.where("status").is(CrackingHashTaskStatus.HALF_READY)
-            .and("startedAt").lt(now.minus(taskProperties.halfReadyLifetimeDurationThreshold()));
+            .and("updatedAt").lt(now.minus(taskProperties.halfReadyLifetimeDurationThreshold()));
 
         Query query = new Query(
             new Criteria().orOperator(
@@ -132,7 +132,8 @@ public class TaskKafkaRepo implements TaskRepo {
         Update update = new Update()
             .set("status", task.getStatus())
             .set("taskPartCount", task.getTaskPartCount())
-            .set("startedAt", task.getStartedAt());
+            .set("startedAt", task.getStartedAt())
+            .set("updatedAt", task.getUpdatedAt());
 
         FindAndModifyOptions options = new FindAndModifyOptions()
             .returnNew(true)

@@ -15,18 +15,19 @@ spring:
     representation:
       uuid: standard
 
-send-type: ${SEND_TYPE:kafka}
+send-type: ${SEND_TYPE:rest}
 
 worker:
-  number: ${WORKER_NUMBER:2}
+  number: ${WORKER_NUMBER:3}
   urls:
-    - ${WORKER-URL-1:http://localhost:8086}
-    - ${WORKER-URL-2:http://localhost:8086}
+    - ${WORKER_URL_1:http://localhost:8086}
+    - ${WORKER_URL_2:http://localhost:8087}
+    - ${WORKER_URL_3:http://localhost:8088}
 
 crack-hash:
   task:
-    in_process_lifetime-duration-threshold: PT10S
-    half_ready_lifetime-duration-threshold: PT20S
+    in_process_lifetime-duration-threshold: PT5S
+    half_ready_lifetime-duration-threshold: PT10S
 
   kafka:
     producer:
@@ -43,4 +44,5 @@ crack-hash:
         key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
         group-id: crackhash_task_result_group_id
+        auto-offset-reset: earliest
       topic: crackhash_task_result_topic

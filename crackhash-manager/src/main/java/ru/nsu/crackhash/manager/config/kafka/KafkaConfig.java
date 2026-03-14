@@ -1,7 +1,6 @@
 package ru.nsu.crackhash.manager.config.kafka;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -9,13 +8,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
 import ru.nsu.crackhash.manager.config.kafka.properties.CrackHashKafkaProperties;
 import ru.nsu.crackhash.manager.config.kafka.worker.WorkerConfig;
 
@@ -46,15 +45,6 @@ public class KafkaConfig {
     }
 
     @Bean
-    public NewTopic crackhashTaskRequestTopic() {
-        return TopicBuilder
-            .name(crackHashKafkaProperties.producer().topic())
-            .partitions(workerConfig.number())
-            .replicas(1)
-            .build();
-    }
-
-    @Bean
     public ConsumerFactory<String, String> crackHashConsumerFactory() {
         var props = crackHashKafkaProperties.consumer().config().buildProperties();
         return new DefaultKafkaConsumerFactory<>(props);
@@ -67,6 +57,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
             new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 }

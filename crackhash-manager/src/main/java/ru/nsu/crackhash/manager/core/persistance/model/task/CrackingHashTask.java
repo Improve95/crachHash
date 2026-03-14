@@ -37,5 +37,5 @@ public class CrackingHashTask {
 
     private Instant startedAt;
 
-    private Instant completedAt;
+    private Instant updatedAt;
 }

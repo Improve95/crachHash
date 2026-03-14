@@ -2,6 +2,7 @@ package ru.nsu.crackhash.manager.core.kafka;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
 import ru.nsu.crackhash.manager.config.kafka.KafkaConfig;
@@ -26,11 +27,13 @@ public class CrackingHashTaskResultKafkaConsumer {
 
     @KafkaListener(
         topics = "${crack-hash.kafka.consumer.topic}",
-        containerFactory = "crackHashTaskResultKafkaListenerContainerFactory"
+        containerFactory = "crackHashTaskResultKafkaListenerContainerFactory",
+        concurrency = "1"
     )
-    private void listenCrackHashTaskResultTopic(String body) {
+    private void listenCrackHashTaskResultTopic(String body, Acknowledgment ack) {
         hashWordService.receiveCrackHashResult(
             objectMapper.readValue(body, ReceiveCrackResultRequest.class)
         );
+        ack.acknowledge();
     }
 }

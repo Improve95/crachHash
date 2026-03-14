@@ -36,7 +36,7 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: crackhash_zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://crackhash_kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://crackhash_kafka:29092,EXTERNAL://crackhash_kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -49,9 +49,9 @@ services:
     container_name: "manager-service"
     environment:
       KAFKA_URL: crackhash_kafka:9092
-      WORKER-URL-1: http://crackhash-worker-service-1:8086
-      WORKER-URL-2: http://crackhash-worker-service-2:8087
-      WORKER-URL-3: http://crackhash-worker-service-3:8088
+      WORKER_URL_1: http://crackhash-worker-service-1:8086
+      WORKER_URL_2: http://crackhash-worker-service-2:8087
+      WORKER_URL_3: http://crackhash-worker-service-3:8088
       MONGO_DB_HOST: crackhash_db_mongo
       SEND_TYPE: rest
       WORKER_NUMBER: 3

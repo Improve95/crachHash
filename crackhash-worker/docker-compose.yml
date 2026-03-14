@@ -7,12 +7,38 @@ services:
       KAFKA_URL: crackhash_kafka:9092
       MANAGER_URL: http://crackhash-manager-service:8085
       SEND_TYPE: rest
-      WORKER_NUMBER: 1
+      WORKER_NUMBER: 3
     ports:
       - "8086:8086"
     networks:
       - crackhash-net
-      -
+  crackhash-worker-service-2:
+    build:
+      dockerfile: Dockerfile
+    container_name: "worker-service-2"
+    environment:
+      KAFKA_URL: crackhash_kafka:9092
+      MANAGER_URL: http://crackhash-manager-service:8085
+      SEND_TYPE: rest
+      WORKER_NUMBER: 3
+    ports:
+      - "8087:8086"
+    networks:
+      - crackhash-net
+  crackhash-worker-service-3:
+    build:
+      dockerfile: Dockerfile
+    container_name: "worker-service-3"
+    environment:
+      KAFKA_URL: crackhash_kafka:9092
+      MANAGER_URL: http://crackhash-manager-service:8085
+      SEND_TYPE: rest
+      WORKER_NUMBER: 3
+    ports:
+      - "8088:8086"
+    networks:
+      - crackhash-net
+
 networks:
   crackhash-net:
     name: "crackhash-net"

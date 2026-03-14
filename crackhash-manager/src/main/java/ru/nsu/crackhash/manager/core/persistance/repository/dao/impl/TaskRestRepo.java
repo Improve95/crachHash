@@ -43,24 +43,6 @@ public class TaskRestRepo implements TaskRepo {
         return crackingHashQueue.size();
     }
 
-    /*@Override
-    public CrackingHashTask getFromQueue() {
-        UUID taskId = crackingHashQueue.peek();
-        if (taskId != null) {
-            return crackingHashTaskMap.get(taskId);
-        }
-        return null;
-    }
-
-    @Override
-    public CrackingHashTask removeFromQueue() {
-        UUID taskId = crackingHashQueue.poll();
-        if (taskId != null) {
-            return crackingHashTaskMap.get(taskId);
-        }
-        return null;
-    }*/
-
     @Override
     public void markHungTask() {
         for (UUID taskId : crackingHashQueue) {
@@ -84,7 +66,8 @@ public class TaskRestRepo implements TaskRepo {
                 return crackingHashTask;
             } else if (crackingHashTask.getStatus() == READY) {
                 continue;
-            } else {
+            } else if (crackingHashTask.getStatus() == IN_PROGRESS
+                || crackingHashTask.getStatus() == HALF_READY) {
                 return null;
             }
         }
