@@ -1,19 +1,4 @@
 services:
-  crackhash_db_mongo:
-    image: mongo:8.0
-    container_name: "crackhash-mongo"
-    ports:
-      - '27017:27017'
-    restart: unless-stopped
-    logging:
-      options:
-        max-size: 300mb
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=mongo_user
-      - MONGO_INITDB_ROOT_PASSWORD=mongo_password
-    networks:
-      - crackhash-net
-
   crackhash_zookeeper:
     image: confluentinc/cp-zookeeper:7.9.0
     container_name: "crackhash-zookeeper"
@@ -50,10 +35,11 @@ services:
     environment:
       KAFKA_URL: crackhash_kafka:9092
       WORKER_URL_1: http://crackhash-worker-service-1:8086
-      WORKER_URL_2: http://crackhash-worker-service-2:8087
-      WORKER_URL_3: http://crackhash-worker-service-3:8088
-      MONGO_DB_HOST: crackhash_db_mongo
-      SEND_TYPE: rest
+      WORKER_URL_2: http://crackhash-worker-service-2:8086
+      WORKER_URL_3: http://crackhash-worker-service-3:8086
+      MONGO_DB_HOST: mongo-1
+      MONGO_DB_PORT: 27017
+      SEND_TYPE: kafka
       WORKER_NUMBER: 3
     ports:
       - "8085:8085"

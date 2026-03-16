@@ -1,0 +1,70 @@
+services:
+  mongo-pre-config:
+    image: mongo:8.0
+    container_name: "mongo-pre-config"
+    entrypoint: >
+      /bin/bash -c '
+      openssl rand -base64 756 > /security/keyfile.key &&
+      chmod 400 /security/keyfile.key'
+    volumes:
+      - 'sharedconfig:/security'
+
+  mongo-1:
+    container_name: 'mongo-1'
+    image: mongo:8.0
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo_user
+      - MONGO_INITDB_ROOT_PASSWORD=mongo_password
+      - MONGO_INITDB_DATABASE=crackhash_db_mongo
+    volumes:
+      - 'sharedconfig:/security'
+    depends_on:
+      - mongo-pre-config
+    command: mongod --port 27017 --replSet rs0 --bind_ip_all --keyFile /security/keyfile.key
+    networks:
+      - crackhash-net
+
+  mongo-2:
+    container_name: "mongo-2"
+    image: mongo:8.0
+    ports:
+      - 27018:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo_user
+      - MONGO_INITDB_ROOT_PASSWORD=mongo_password
+      - MONGO_INITDB_DATABASE=crackhash_db_mongo
+    volumes:
+      - 'sharedconfig:/security'
+    depends_on:
+      - mongo-pre-config
+    command: mongod --port 27017 --replSet rs0 --bind_ip_all --keyFile /security/keyfile.key
+    networks:
+      - crackhash-net
+
+  mongo-3:
+    container_name: "mongo-3"
+    image: mongo:8.0
+    ports:
+      - 27019:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo_user
+      - MONGO_INITDB_ROOT_PASSWORD=mongo_password
+      - MONGO_INITDB_DATABASE=crackhash_db_mongo
+    volumes:
+      - 'sharedconfig:/security'
+    depends_on:
+      - mongo-pre-config
+    command: mongod --port 27017 --replSet rs0 --bind_ip_all --keyFile /security/keyfile.key
+    networks:
+      - crackhash-net
+
+volumes:
+  sharedconfig:
+
+networks:
+  crackhash-net:
+    name: "crackhash-net"
+    driver: bridge
+    external: true
