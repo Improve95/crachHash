@@ -90,10 +90,16 @@ public class TaskKafkaRepo implements TaskRepo {
             ),
             Aggregation.unwind("task"),
             Aggregation.match(
+                Criteria.where("task.status").nin(
+                    CrackingHashTaskStatus.READY,
+                    CrackingHashTaskStatus.FAILED
+                )
+            ),
+            Aggregation.limit(1),
+            Aggregation.match(
                 Criteria.where("task.status").is(CrackingHashTaskStatus.WAITING)
             ),
-            Aggregation.replaceRoot("task"),
-            Aggregation.limit(1)
+            Aggregation.replaceRoot("task")
         );
 
         AggregationResults<CrackingHashTask> results =

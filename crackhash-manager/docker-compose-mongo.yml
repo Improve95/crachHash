@@ -1,13 +1,13 @@
 services:
-  mongo-pre-config:
-    image: mongo:8.0
-    container_name: "mongo-pre-config"
-    entrypoint: >
-      /bin/bash -c '
-      openssl rand -base64 756 > /security/keyfile.key &&
-      chmod 400 /security/keyfile.key'
-    volumes:
-      - 'sharedconfig:/security'
+#  mongo-pre-config:
+#    image: mongo:8.0
+#    container_name: "mongo-pre-config"
+#    entrypoint: >
+#      /bin/bash -c '
+#      openssl rand -base64 756 > /security/keyfile.key &&
+#      chmod 400 /security/keyfile.key'
+#    volumes:
+#      - 'sharedconfig:/security'
 
   mongo-1:
     container_name: 'mongo-1'

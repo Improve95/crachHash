@@ -9,5 +9,5 @@ import java.util.List;
 public class AlphabetConfig {
 
     @Getter
-    private final List<String> alphabet = List.of("r", "i", "s", "e", "m");
+    private final List<String> alphabet = List.of("r", "i", "s", "e", "m", "1", "2");
 }
