@@ -102,9 +102,7 @@ public class HashWordServiceImpl implements HashWordService {
 
     @Override
     public void increaseTaskProgress(AddWorkerProgressRequest request) {
-        CrackingHashTask task = taskRepo.getTask(request.taskId());
-        task.setProgress(crackingTaskService.calculateNewTaskProgress(request.increaseProgressPercent(), task));
-        taskRepo.update(task.getId(), task);
+        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / workerNumber);
     }
 
     private void runTaskFromQueue() {

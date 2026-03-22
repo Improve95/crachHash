@@ -15,7 +15,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +31,8 @@ public class HashCrackingServiceImpl implements HashCrackingService {
     private final ResultService resultService;
 
     private final ExecutorService executorService;
+
+    private final Map<UUID, Boolean> cancellationTokenMap = new ConcurrentHashMap<>();
 
     @Value("${crack-hash.execution-timeout}")
     private int timeoutTaskExecution;
@@ -47,8 +52,24 @@ public class HashCrackingServiceImpl implements HashCrackingService {
 
     @Override
     public CompletableFuture<Boolean> createCrackHashTask(CreateCrackHashTaskRequest request) {
+        UUID distributedWorkerTaskId = UUID.randomUUID();
+        cancellationTokenMap.put(distributedWorkerTaskId, false);
+
         return CompletableFuture
-            .runAsync(() -> startCrackingHash(request), executorService)
+            .runAsync(
+                () -> {
+                    List<String> answers = crackHash(request, distributedWorkerTaskId);
+                    cancellationTokenMap.remove(distributedWorkerTaskId);
+
+                    resultService.sendTaskResultToManager(
+                        SendCrackResultRequest.builder()
+                            .taskId(request.requestId())
+                            .answers(answers)
+                            .build()
+                    );
+                },
+                executorService
+            )
             .orTimeout(timeoutTaskExecution, TimeUnit.MILLISECONDS)
             .handleAsync((result, ex) -> {
                 if (ex == null) {
@@ -58,6 +79,7 @@ public class HashCrackingServiceImpl implements HashCrackingService {
                     );
                     return true;
                 } else {
+                    cancellationTokenMap.computeIfPresent(distributedWorkerTaskId, (k, v) -> true);
                     log.error(
                         "failed cracking hash task, id: {}, cause: {}",
                         request.requestId(),
@@ -68,47 +90,61 @@ public class HashCrackingServiceImpl implements HashCrackingService {
             });
     }
 
-    private void startCrackingHash(CreateCrackHashTaskRequest request) {
+    /*private UUID startCrackingHash(CreateCrackHashTaskRequest request) {
         long totalWordsForCheck = request.partCount();
         List<String> answers = new ArrayList<>();
 
-        long diffChangeSizeForRequiredPercent = totalWordsForCheck / 100L * sendProgressEveryPercent;
-        crackHash(request, totalWordsForCheck, answers, diffChangeSizeForRequiredPercent);
+        UUID distributedWorkerTaskId = UUID.randomUUID();
 
+        long diffChangeSizeForRequiredPercent = totalWordsForCheck / 100L * sendProgressEveryPercent;
+
+        crackHash(request, totalWordsForCheck, answers, diffChangeSizeForRequiredPercent);
         resultService.sendTaskResultToManager(
             SendCrackResultRequest.builder()
                 .taskId(request.requestId())
                 .answers(answers)
                 .build()
         );
-    }
 
-    private void crackHash(
-        CreateCrackHashTaskRequest createCrackHashTaskRequest,
-        long totalWordsForCheck,
-        List<String> answers,
-        long diffChangeSizeForRequiredPercent
+        return distributedWorkerTaskId;
+    }*/
+
+    private List<String> crackHash(
+        CreateCrackHashTaskRequest request,
+        UUID distributedWorkerTaskId
     ) {
-        Iterator<String> wordsIterator = Generator.permutation(createCrackHashTaskRequest.alphabet())
-            .withRepetitions(createCrackHashTaskRequest.maxLength())
+        long totalWordsForCheck = request.partCount();
+        long diffChangeSizeForRequiredPercent = totalWordsForCheck / 100L * sendProgressEveryPercent;
+
+        Iterator<String> wordsIterator = Generator.permutation(request.alphabet())
+            .withRepetitions(request.maxLength())
             .stream()
-            .skip(createCrackHashTaskRequest.partCount() * createCrackHashTaskRequest.partNumber())
+            .skip(request.partCount() * request.partNumber())
             .limit(totalWordsForCheck)
             .map(wl -> String.join("", wl))
             .iterator();
 
         int checkedWords = 0;
-        while (wordsIterator.hasNext()) {
+        ArrayList<String> answers = new ArrayList<>();
+        while (wordsIterator.hasNext() && !cancellationTokenMap.get(distributedWorkerTaskId)) {
             String word = wordsIterator.next();
             String hash = cryptoService.hashingByMd5(word.getBytes(StandardCharsets.UTF_8));
-            if (createCrackHashTaskRequest.hash().equals(hash)) {
+            if (request.hash().equals(hash)) {
                 answers.add(word);
             }
 
             checkedWords++;
-            if (checkedWords >= diffChangeSizeForRequiredPercent) {
+            boolean isSent = resultService.updateTaskProgress(
+                checkedWords,
+                diffChangeSizeForRequiredPercent,
+                request.requestId()
+            );
 
+            if (isSent) {
+                checkedWords = 0;
             }
         }
+
+        return answers;
     }
 }

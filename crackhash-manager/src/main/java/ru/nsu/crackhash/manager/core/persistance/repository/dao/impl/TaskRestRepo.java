@@ -96,6 +96,21 @@ public class TaskRestRepo implements TaskRepo {
     }
 
     @Override
+    public void increaseProgress(UUID taskId, int addProgress) {
+        var mutex = mutexMap.computeIfAbsent(taskId, k -> new ReentrantLock());
+        try {
+            mutex.lock();
+            var task = crackingHashTaskMap.get(taskId);
+            if (task != null) {
+                task.setProgress(task.getProgress() + addProgress);
+            }
+            mutex.unlock();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
     public void update(UUID taskId, CrackingHashTask task) {
         crackingHashTaskMap.computeIfPresent(taskId, (k, v) -> v);
     }

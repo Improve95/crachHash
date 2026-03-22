@@ -134,6 +134,18 @@ public class TaskKafkaRepo implements TaskRepo {
     }
 
     @Override
+    public void increaseProgress(UUID taskId, int addProgress) {
+        Update update = new Update()
+            .inc("progress", addProgress);
+
+        FindAndModifyOptions options = new FindAndModifyOptions()
+            .returnNew(true)
+            .upsert(false);
+
+        mongoTemplate.findAndModify(taskByUuidQuery(taskId), update, options, CrackingHashTask.class);
+    }
+
+    @Override
     public void update(UUID taskId, CrackingHashTask task) {
         Update update = new Update()
             .set("status", task.getStatus())

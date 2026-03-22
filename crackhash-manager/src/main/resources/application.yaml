@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: crackhash-manager
+  autoconfigure:
+    exclude:
+      org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration, 
+      org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration
 
   mongodb:
     uri: ${MONGO_DB_URI:mongodb://mongo_user:mongo_password@localhost:27017,localhost:27018,localhost:27019/crackhack_db_mongo?authSource=admin&replicaSet=rs0}
