@@ -139,7 +139,8 @@ public class TaskKafkaRepo implements TaskRepo {
             .set("status", task.getStatus())
             .set("taskPartCount", task.getTaskPartCount())
             .set("startedAt", task.getStartedAt())
-            .set("updatedAt", task.getUpdatedAt());
+            .set("updatedAt", task.getUpdatedAt())
+            .set("progress", task.getProgress());
 
         FindAndModifyOptions options = new FindAndModifyOptions()
             .returnNew(true)

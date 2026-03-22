@@ -1,5 +1,6 @@
 package ru.nsu.crackhash.manager.core.service;
 
+import ru.nsu.crackhash.manager.api.dto.AddWorkerProgressRequest;
 import ru.nsu.crackhash.manager.api.dto.GetCrackHashProcessStatusResponse;
 import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
@@ -14,4 +15,6 @@ public interface HashWordService {
     void receiveCrackHashResult(ReceiveCrackResultRequest request);
 
     GetCrackHashProcessStatusResponse getCrackingHashStatus(UUID requestId);
+
+    void increaseTaskProgress(AddWorkerProgressRequest request);
 }

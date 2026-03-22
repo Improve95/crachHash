@@ -5,12 +5,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.worker.core.feign.manager.ManagerFeignClient;
 import ru.nsu.crackhash.worker.core.feign.manager.dto.SendCrackResultRequest;
-import ru.nsu.crackhash.worker.core.service.ResultService;
+import ru.nsu.crackhash.worker.core.service.ResultSender;
 
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "send-type", havingValue = "rest")
 @Service
-public class RestResultService implements ResultService {
+public class RestResultSender implements ResultSender {
 
     private final ManagerFeignClient managerFeignClient;
 

@@ -6,12 +6,7 @@ spring:
     name: crackhash-manager
 
   mongodb:
-    host: ${MONGO_DB_HOST:localhost}
-    port: ${MONGO_DB_POST:27017}
-    database: crackhash_db_mongo
-    username: mongo_user
-    password: mongo_password
-    authentication-database: admin
+    uri: ${MONGO_DB_URI:mongodb://mongo_user:mongo_password@localhost:27017,localhost:27018,localhost:27019/crackhack_db_mongo?authSource=admin&replicaSet=rs0}
     representation:
       uuid: standard
 
@@ -26,8 +21,8 @@ worker:
 
 crack-hash:
   task:
-    in_process_lifetime-duration-threshold: PT5S
-    half_ready_lifetime-duration-threshold: PT10S
+    in_process_lifetime-duration-threshold: PT10S
+    half_ready_lifetime-duration-threshold: PT20S
 
   kafka:
     producer:

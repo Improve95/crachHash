@@ -3,11 +3,8 @@ services:
     build:
       dockerfile: Dockerfile
     container_name: "worker-service-1"
-    environment:
-      KAFKA_URL: crackhash_kafka:9092
-      MANAGER_URL: http://crackhash-manager-service:8085
-      SEND_TYPE: rest
-      WORKER_NUMBER: 3
+    env_file:
+      - .env
     ports:
       - "8086:8086"
     networks:
@@ -16,11 +13,8 @@ services:
     build:
       dockerfile: Dockerfile
     container_name: "worker-service-2"
-    environment:
-      KAFKA_URL: crackhash_kafka:9092
-      MANAGER_URL: http://crackhash-manager-service:8085
-      SEND_TYPE: rest
-      WORKER_NUMBER: 3
+    env_file:
+      - .env
     ports:
       - "8087:8086"
     networks:
@@ -29,11 +23,8 @@ services:
     build:
       dockerfile: Dockerfile
     container_name: "worker-service-3"
-    environment:
-      KAFKA_URL: crackhash_kafka:9092
-      MANAGER_URL: http://crackhash-manager-service:8085
-      SEND_TYPE: rest
-      WORKER_NUMBER: 3
+    env_file:
+      - .env
     ports:
       - "8088:8086"
     networks:

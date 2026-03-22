@@ -3,7 +3,9 @@ package ru.nsu.crackhash.manager.core.service.impl.hashword;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.nsu.crackhash.manager.api.dto.AddWorkerProgressRequest;
 import ru.nsu.crackhash.manager.api.dto.GetCrackHashProcessStatusResponse;
 import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
@@ -35,6 +37,9 @@ public class HashWordServiceImpl implements HashWordService {
     private final CrackHashTaskDistributed crackHashTaskDistributed;
 
     private final TaskRepo taskRepo;
+
+    @Value("${worker.number}")
+    private int workerNumber;
 
     @Override
     public StartCrackingHashProcessResponse addCrackHashTaskInQueue(StartCrackingHashProcessRequest request) {
@@ -93,6 +98,13 @@ public class HashWordServiceImpl implements HashWordService {
             .crackingHashTaskStatus(crackingHashTask.getStatus())
             .answers(crackingHashTask.getAnswers())
             .build();
+    }
+
+    @Override
+    public void increaseTaskProgress(AddWorkerProgressRequest request) {
+        CrackingHashTask task = taskRepo.getTask(request.taskId());
+        task.setProgress(crackingTaskService.calculateNewTaskProgress(request.increaseProgressPercent(), task));
+        taskRepo.update(task.getId(), task);
     }
 
     private void runTaskFromQueue() {

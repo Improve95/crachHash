@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.nsu.crackhash.manager.api.dto.AddWorkerProgressRequest;
 import ru.nsu.crackhash.manager.api.dto.GetCrackHashProcessStatusResponse;
 import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
@@ -37,11 +38,14 @@ public class CrackHashController {
         hashWordService.receiveCrackHashResult(request);
     }
 
-    @GetMapping("/request/status")
-    public ResponseEntity<GetCrackHashProcessStatusResponse> getWordStatusResponse(
-        @RequestParam(value = "requestId") UUID requestId
-    ) {
+    @GetMapping("/task/status")
+    public ResponseEntity<GetCrackHashProcessStatusResponse> getWordStatusResponse(@RequestParam UUID requestId) {
         var response = hashWordService.getCrackingHashStatus(requestId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/task/progress/increase")
+    public void addWorkerProgressForTask(AddWorkerProgressRequest request) {
+
     }
 }

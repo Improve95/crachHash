@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.worker.config.kafka.KafkaConfig;
 import ru.nsu.crackhash.worker.core.feign.manager.dto.SendCrackResultRequest;
 import ru.nsu.crackhash.worker.core.kafka.CrackingHashTaskResultKafkaProducer;
-import ru.nsu.crackhash.worker.core.service.ResultService;
+import ru.nsu.crackhash.worker.core.service.ResultSender;
 
 @RequiredArgsConstructor
 @ConditionalOnBean(KafkaConfig.class)
 @Service
-public class KafkaResultServiceImpl implements ResultService {
+public class KafkaResultSenderImpl implements ResultSender {
 
     private final CrackingHashTaskResultKafkaProducer crackingHashTaskResultKafkaProducer;
 

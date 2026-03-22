@@ -16,6 +16,8 @@ send-type: ${SEND_TYPE:rest}
 
 crack-hash:
   cracking-hash-thread-pool-size: ${CRACKING_HASH_THREAD_POOL_SIZE:10}
+  execution-timeout: ${CRACK_HASH_TASK_EXECUTION_TIMEOUT_MS:8000}
+  send-progress-every-percent: ${SEND_PROGRESS_EVERY_PERCENT:5}
 
   kafka:
     producer:
@@ -35,6 +37,6 @@ crack-hash:
         group-id: crackhash_task_request_group_id
         auto-offset-reset: earliest
       properties:
-        concurrency: ${WORKER_NUMBER:2}
+        concurrency: ${WORKER_NUMBER:3}
 
       topic: crackhash_task_request_topic
