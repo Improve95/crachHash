@@ -96,7 +96,7 @@ public class TaskRestRepo implements TaskRepo {
     }
 
     @Override
-    public void increaseProgress(UUID taskId, int addProgress) {
+    public void increaseProgress(UUID taskId, double addProgress) {
         var mutex = mutexMap.computeIfAbsent(taskId, k -> new ReentrantLock());
         try {
             mutex.lock();

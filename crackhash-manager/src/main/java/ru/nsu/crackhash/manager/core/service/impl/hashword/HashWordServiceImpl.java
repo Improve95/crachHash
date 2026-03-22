@@ -86,23 +86,24 @@ public class HashWordServiceImpl implements HashWordService {
 
     @Override
     public GetCrackHashProcessStatusResponse getCrackingHashStatus(UUID requestId) {
-        CrackingHashTask crackingHashTask = taskRepo.getTask(requestId);
+        CrackingHashTask task = taskRepo.getTask(requestId);
 
-        if (crackingHashTask == null) {
+        if (task == null) {
             return null;
         }
 
         runTaskFromQueue();
 
         return GetCrackHashProcessStatusResponse.builder()
-            .crackingHashTaskStatus(crackingHashTask.getStatus())
-            .answers(crackingHashTask.getAnswers())
+            .crackingHashTaskStatus(task.getStatus())
+            .answers(task.getAnswers())
+            .progress(task.getStatus() == READY ? 100 : (int) Math.ceil(task.getProgress()))
             .build();
     }
 
     @Override
     public void increaseTaskProgress(AddWorkerProgressRequest request) {
-        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / workerNumber);
+        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / (double) workerNumber);
     }
 
     private void runTaskFromQueue() {

@@ -17,7 +17,7 @@ public interface TaskRepo {
 
     void addAnswers(UUID taskId, List<String> answers);
 
-    void increaseProgress(UUID taskId, int addProgress);
+    void increaseProgress(UUID taskId, double addProgress);
 
     void update(UUID taskId, CrackingHashTask task);
 }

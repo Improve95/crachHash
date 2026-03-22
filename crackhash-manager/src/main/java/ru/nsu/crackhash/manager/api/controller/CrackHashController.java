@@ -45,7 +45,7 @@ public class CrackHashController {
     }
 
     @PostMapping("/task/progress/increase")
-    public void addWorkerProgressForTask(AddWorkerProgressRequest request) {
+    public void addWorkerProgressForTask(@RequestBody AddWorkerProgressRequest request) {
         hashWordService.increaseTaskProgress(request);
     }
 }

@@ -5,4 +5,4 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record AddWorkerProgressRequest(UUID taskId, int increaseProgressPercent) {}
+public record AddWorkerProgressRequest(UUID taskId, double increaseProgressPercent) {}

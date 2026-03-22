@@ -6,4 +6,8 @@ import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStat
 import java.util.List;
 
 @Builder
-public record GetCrackHashProcessStatusResponse(int progress, CrackingHashTaskStatus crackingHashTaskStatus, List<String> answers) {}
+public record GetCrackHashProcessStatusResponse(
+    int progress,
+    CrackingHashTaskStatus crackingHashTaskStatus,
+    List<String> answers
+) {}

@@ -6,7 +6,6 @@ import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
 import ru.nsu.crackhash.manager.config.alphabet.AlphabetConfig;
 import ru.nsu.crackhash.manager.config.kafka.worker.WorkerConfig;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
-import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.service.CrackingTaskService;
 
 import java.math.BigInteger;
@@ -45,10 +44,5 @@ public class CrackingTaskServiceImpl implements CrackingTaskService {
         }
 
         return crackHashTaskWorkerRequests;
-    }
-
-    @Override
-    public int calculateNewTaskProgress(int increasePercent, CrackingHashTask task) {
-        return task.getProgress() + increasePercent / workerConfig.number();
     }
 }

@@ -134,7 +134,7 @@ public class TaskKafkaRepo implements TaskRepo {
     }
 
     @Override
-    public void increaseProgress(UUID taskId, int addProgress) {
+    public void increaseProgress(UUID taskId, double addProgress) {
         Update update = new Update()
             .inc("progress", addProgress);
 

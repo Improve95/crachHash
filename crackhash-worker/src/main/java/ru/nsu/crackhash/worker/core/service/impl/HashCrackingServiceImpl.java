@@ -37,8 +37,8 @@ public class HashCrackingServiceImpl implements HashCrackingService {
     @Value("${crack-hash.execution-timeout}")
     private int timeoutTaskExecution;
 
-    @Value("${crack-hash.send-progress-every-percent}")
-    private long sendProgressEveryPercent;
+//    @Value("${crack-hash.send-progress-every-percent}")
+//    private long sendProgressEveryPercent;
 
     public HashCrackingServiceImpl(
         CryptoService cryptoService,
@@ -60,6 +60,10 @@ public class HashCrackingServiceImpl implements HashCrackingService {
                 () -> {
                     List<String> answers = crackHash(request, distributedWorkerTaskId);
                     cancellationTokenMap.remove(distributedWorkerTaskId);
+
+                    if (answers == null) {
+                        return;
+                    }
 
                     resultService.sendTaskResultToManager(
                         SendCrackResultRequest.builder()
@@ -114,7 +118,6 @@ public class HashCrackingServiceImpl implements HashCrackingService {
         UUID distributedWorkerTaskId
     ) {
         long totalWordsForCheck = request.partCount();
-        long diffChangeSizeForRequiredPercent = totalWordsForCheck / 100L * sendProgressEveryPercent;
 
         Iterator<String> wordsIterator = Generator.permutation(request.alphabet())
             .withRepetitions(request.maxLength())
@@ -134,17 +137,16 @@ public class HashCrackingServiceImpl implements HashCrackingService {
             }
 
             checkedWords++;
-            boolean isSent = resultService.updateTaskProgress(
+            boolean isSentUpdateProgress = resultService.updateTaskProgress(
                 checkedWords,
-                diffChangeSizeForRequiredPercent,
+                totalWordsForCheck,
                 request.requestId()
             );
-
-            if (isSent) {
+            if (isSentUpdateProgress) {
                 checkedWords = 0;
             }
         }
 
-        return answers;
+        return wordsIterator.hasNext() ? null : answers;
     }
 }

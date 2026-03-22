@@ -29,7 +29,7 @@ public class CrackingHashTask {
 
     private List<String> answers;
 
-    private int progress;
+    private double progress;
 
     private int currentCompletedTaskPartCount;
 
