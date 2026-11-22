@@ -31,6 +31,8 @@ dependencies {
 
 	implementation 'org.apache.commons:commons-lang3:3.18.0'
 
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.4'
