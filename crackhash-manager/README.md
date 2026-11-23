@@ -60,10 +60,7 @@ environment:
 | Переменная       | По умолчанию            | Описание                                 |
 |------------------|-------------------------|------------------------------------------|
 | `SEND_TYPE`      | `rest`                  | Режим отправки задач: `rest` или `kafka` |
-| `WORKER_NUMBER`  | `3`                     | Количество воркеров                      |
-| `WORKER_URL_1`   | `http://localhost:8086` | URL первого воркера                      |
-| `WORKER_URL_2`   | `http://localhost:8086` | URL второго воркера                      |
-| `WORKER_URL_3`   | `http://localhost:8086` | URL третьего воркера                     |
+| `CLUSTER_INFO_PATH` | `./clusterInfo.yaml` | Путь к внешнему YAML со списком воркеров |
 | `KAFKA_URL`      | `localhost:9092`        | Адрес Kafka-брокера                      |
 | `MONGO_DB_HOST`  | `localhost`             | Хост MongoDB                             |
 | `MONGO_DB_PORT`  | `27017`                 | Порт MongoDB                             |
@@ -75,13 +72,6 @@ server:
   port: 8085                          # Порт сервиса
 
 send-type: ${SEND_TYPE:rest}          # Режим отправки задач
-
-worker:
-  number: ${WORKER_NUMBER:3}          # Количество воркеров
-  urls:
-    - ${WORKER_URL_1:http://localhost:8086}
-    - ${WORKER_URL_2:http://localhost:8086}
-    - ${WORKER_URL_3:http://localhost:8086}
 
 crack-hash:
   task:
@@ -103,6 +93,8 @@ crack-hash:
       topic: crackhash_task_result_topic
 
 spring:
+  config:
+    import: "file:${CLUSTER_INFO_PATH:./clusterInfo.yaml}"
   mongodb:
     host: ${MONGO_DB_HOST:localhost}
     port: ${MONGO_DB_POST:27017}
@@ -111,6 +103,93 @@ spring:
     password: mongo_password
     authentication-database: admin
 ```
+
+### Внешний список воркеров
+
+Файл `clusterInfo.yaml` хранится вне JAR и Docker-образа:
+
+```yaml
+cluster:
+  workers:
+    worker-1:
+      url: http://localhost:8086
+    "42":
+      url: http://localhost:8087
+```
+
+Spring Boot импортирует файл через `spring.config.import` и связывает `cluster.workers`
+с `Map<String, WorkerConfig>` в `ClusterProperties`. Ключ — строковое имя или ID,
+значение — расширяемый класс `WorkerConfig` с полем `url`. Число частей задачи
+вычисляется по размеру мапы и в REST-, и в Kafka-режиме. В Kafka URL не используется
+для отправки: задачи по-прежнему передаются через топик.
+
+Используйте простые ID из букв, цифр и дефисов; числовые ID заключайте в кавычки.
+Для ключей со специальными символами используйте синтаксис Spring, например `"[worker/east]"`.
+Файл обязателен: отсутствие файла, пустая мапа или пустой URL останавливают запуск.
+`WORKER_NUMBER` и `WORKER_URL_*` больше не используются.
+
+Путь задаётся без префикса `file:`. Относительный путь считается от рабочего каталога процесса.
+Пример запуска в PowerShell:
+
+```powershell
+$env:CLUSTER_INFO_PATH = 'C:/configs/clusterInfo.yaml'
+java -jar build/libs/manager-service-0.0.1-SNAPSHOT.jar
+```
+
+Для Docker Compose используется `config/docker/clusterInfo.yaml`, каталог монтируется
+только для чтения в `/etc/crackhash`, а `CLUSTER_INFO_PATH` задан в `environment`.
+После изменения файла выполните `docker compose restart crackhash-manager-service`.
+При первом переходе на новую конфигурацию пересоздайте контейнер через `docker compose up -d --build`.
+
+### Хранение в Kubernetes
+
+Храните конфиги окружений в Git рядом с манифестами развёртывания (при необходимости
+в отдельном инфраструктурном репозитории). В кластере создавайте из файла ConfigMap
+и монтируйте её как каталог. В URL указывайте стабильные DNS-имена Service воркеров,
+а не IP Pod. Конфигурация не включается в образ приложения.
+
+Создать или обновить ConfigMap из подготовленного для Kubernetes файла:
+
+```bash
+kubectl create configmap crackhash-cluster --from-file=clusterInfo.yaml=./clusterInfo.yaml --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Фрагмент Deployment (добавьте к остальным настройкам контейнера менеджера):
+
+```yaml
+spec:
+  template:
+    spec:
+      containers:
+        - name: crackhash-manager
+          env:
+            - name: CLUSTER_INFO_PATH
+              value: /etc/crackhash/clusterInfo.yaml
+          volumeMounts:
+            - name: cluster-info
+              mountPath: /etc/crackhash
+              readOnly: true
+      volumes:
+        - name: cluster-info
+          configMap:
+            name: crackhash-cluster
+```
+
+После обновления ConfigMap перезапустите Deployment (подставьте его имя и namespace):
+
+```bash
+kubectl rollout restart deployment/crackhash-manager
+kubectl rollout status deployment/crackhash-manager
+```
+
+Spring читает конфиг при старте: новые Pod получат актуальный файл без пересборки JAR
+и образа. Изменение только ConfigMap не запускает rollout; повторный `apply` неизменного
+Deployment тоже не перезапустит Pod. Для автоматизации можно менять checksum-аннотацию
+в `spec.template.metadata.annotations` средствами Helm при изменении конфига.
+Горячее перечитывание в работающем приложении не предусмотрено.
+
+Документация: [внешняя конфигурация Spring Boot](https://docs.spring.io/spring-boot/reference/features/external-config.html),
+[обновление ConfigMap](https://kubernetes.io/docs/tutorials/configuration/updating-configuration-via-a-configmap/).
 
 ### Алфавит
 

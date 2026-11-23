@@ -16,7 +16,6 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import ru.nsu.crackhash.manager.config.kafka.properties.CrackHashKafkaProperties;
-import ru.nsu.crackhash.manager.config.kafka.worker.WorkerConfig;
 
 @ConditionalOnProperty(name = "send-type", havingValue = "kafka")
 @RequiredArgsConstructor
@@ -24,8 +23,6 @@ import ru.nsu.crackhash.manager.config.kafka.worker.WorkerConfig;
 public class KafkaConfig {
 
     private final CrackHashKafkaProperties crackHashKafkaProperties;
-
-    private final WorkerConfig workerConfig;
 
     @Bean
     public ProducerFactory<String, String> crackHashProducerFactory() {

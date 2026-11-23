@@ -1,0 +1,8 @@
+cluster:
+  workers:
+    worker-1:
+      url: http://localhost:8086
+    worker-2:
+      url: http://localhost:8087
+    worker-3:
+      url: http://localhost:8088

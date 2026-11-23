@@ -48,12 +48,11 @@ services:
     container_name: "manager-service"
     environment:
       KAFKA_URL: crackhash_kafka:9092
-      WORKER_URL_1: http://crackhash-worker-service-1:8086
-      WORKER_URL_2: http://crackhash-worker-service-2:8086
-      WORKER_URL_3: http://crackhash-worker-service-3:8086
+      CLUSTER_INFO_PATH: /etc/crackhash/clusterInfo.yaml
       MONGO_DB_URI: mongodb://mongo_user:mongo_password@mongo-1:27017,mongo-2:27017,mongo-3:27017/crackhash_db_mongo?authSource=admin&replicaSet=rs0
       SEND_TYPE: kafka
-      WORKER_NUMBER: 3
+    volumes:
+      - ./config/docker:/etc/crackhash:ro
     ports:
       - "8085:8085"
     networks:

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
 import ru.nsu.crackhash.manager.config.alphabet.AlphabetConfig;
-import ru.nsu.crackhash.manager.config.kafka.worker.WorkerConfig;
+import ru.nsu.crackhash.manager.config.cluster.ClusterProperties;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.service.CrackingTaskService;
 
@@ -19,7 +19,7 @@ public class CrackingTaskServiceImpl implements CrackingTaskService {
 
     private final AlphabetConfig alphabetConfig;
 
-    private final WorkerConfig workerConfig;
+    private final ClusterProperties clusterProperties;
 
     @Override
     public List<CrackHashTaskWorkerRequest> createCrackRequest(UUID taskId, StartCrackingHashProcessRequest request) {
@@ -27,7 +27,7 @@ public class CrackingTaskServiceImpl implements CrackingTaskService {
         bigInteger = bigInteger.pow(request.maxLength());
         long potentialWordsCount = bigInteger.longValue();
 
-        int workersNumber = workerConfig.number();
+        int workersNumber = clusterProperties.workers().size();
         long wordsPerWorker = potentialWordsCount / workersNumber;
         List<CrackHashTaskWorkerRequest> crackHashTaskWorkerRequests = new ArrayList<>();
         for (int i = 0; i < workersNumber; i++) {

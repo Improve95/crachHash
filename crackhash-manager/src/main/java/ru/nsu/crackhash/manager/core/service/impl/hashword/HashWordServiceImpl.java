@@ -3,13 +3,9 @@ package ru.nsu.crackhash.manager.core.service.impl.hashword;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.nsu.crackhash.manager.api.dto.AddWorkerProgressRequest;
-import ru.nsu.crackhash.manager.api.dto.GetCrackHashProcessStatusResponse;
-import ru.nsu.crackhash.manager.api.dto.ReceiveCrackResultRequest;
-import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessRequest;
-import ru.nsu.crackhash.manager.api.dto.StartCrackingHashProcessResponse;
+import ru.nsu.crackhash.manager.api.dto.*;
+import ru.nsu.crackhash.manager.config.cluster.ClusterProperties;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
@@ -22,10 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.HALF_READY;
-import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.IN_PROGRESS;
-import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.READY;
-import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.WAITING;
+import static ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTaskStatus.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,8 +31,7 @@ public class HashWordServiceImpl implements HashWordService {
 
     private final TaskRepo taskRepo;
 
-    @Value("${worker.number}")
-    private int workerNumber;
+    private ClusterProperties clusterProperties;
 
     @Override
     public StartCrackingHashProcessResponse addCrackHashTaskInQueue(StartCrackingHashProcessRequest request) {
@@ -103,7 +95,7 @@ public class HashWordServiceImpl implements HashWordService {
 
     @Override
     public void increaseTaskProgress(AddWorkerProgressRequest request) {
-        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / (double) workerNumber);
+        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / (double) clusterProperties.workers().size());
     }
 
     private void runTaskFromQueue() {

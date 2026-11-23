@@ -2,6 +2,8 @@ server:
   port: 8085
 
 spring:
+  config:
+    import: "file:${CLUSTER_INFO_PATH:./clusterInfo.yaml}"
   application:
     name: crackhash-manager
 
@@ -11,13 +13,6 @@ spring:
       uuid: standard
 
 send-type: ${SEND_TYPE:rest}
-
-worker:
-  number: ${WORKER_NUMBER:3}
-  urls:
-    - ${WORKER_URL_1:http://localhost:8086}
-    - ${WORKER_URL_2:http://localhost:8086}
-    - ${WORKER_URL_3:http://localhost:8086}
 
 crack-hash:
   task:
@@ -31,7 +26,7 @@ crack-hash:
         key-serializer: org.apache.kafka.common.serialization.StringSerializer
         value-serializer: org.apache.kafka.common.serialization.StringSerializer
         retries: 0
-        acks: all
+        acks: -1
       topic: crackhash_task_request_topic
     consumer:
       config:
