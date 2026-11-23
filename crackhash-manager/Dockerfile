@@ -1,21 +1,21 @@
 FROM gradle:9.0.0-jdk21 AS build
 
-WORKDIR /manager-service
-
-COPY build.gradle .
-COPY settings.gradle .
+WORKDIR /app
 
 RUN gradle wrapper
 RUN ./gradlew dependencies --no-daemon
 
+COPY build.gradle .
+COPY settings.gradle .
 COPY src src
+
 RUN ./gradlew bootJar --no-daemon -x test
 
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=build /manager-service/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 EXPOSE 8085
 
