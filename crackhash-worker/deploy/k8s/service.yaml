@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker
+  namespace: imp-worker
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app: worker
+    exercise: sprint1
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30081

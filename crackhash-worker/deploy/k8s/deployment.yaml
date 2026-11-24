@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: imp-worker
+  labels:
+    app: worker
+    sprint: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+      exercise: sprint1
+  template:
+    metadata:
+      labels:
+        app: worker
+        exercise: sprint1
+    spec:
+      nodeSelector:
+        sprint1-worker: "true"
+
+      containers:
+        - name: worker
+          image: worker:0.1.0
+          imagePullPolicy: Never
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: SEND_TYPE
+              value: "rest"
+            - name: MANAGER_URL
+              value: "http://192.168.56.11:8080"
+            - name: WORKER_NUMBER
+              value: "1"
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "768Mi"
+
+          startupProbe:
+            httpGet:
+              path: /sprint1/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+
+          readinessProbe:
+            httpGet:
+              path: /sprint1/health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
