@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: manager
+  namespace: imp-manager
+  labels:
+    app: manager
+    sprint: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manager
+      exercise: sprint1
+  template:
+    metadata:
+      labels:
+        app: manager
+        exercise: sprint1
+    spec:
+      nodeSelector:
+        sprint1-manager: "true"
+
+      containers:
+        - name: manager
+          image: manager:0.2.4
+          imagePullPolicy: Never
+
+          ports:
+            - name: http
+              containerPort: 8080
+
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: SEND_TYPE
+              value: "rest"
+            - name: CLUSTER_INFO_PATH
+              value: "./config/clusterInfo.yaml"
+ 
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "768Mi"
+
+          startupProbe:
+            httpGet:
+              path: /sprint1/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+
+          readinessProbe:
+            httpGet:
+              path: /sprint1/health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: manager
+  namespace: imp-manager
+spec:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  selector:
+    app: manager
+    exercise: sprint1
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30080
