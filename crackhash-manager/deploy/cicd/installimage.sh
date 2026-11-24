@@ -12,7 +12,7 @@ case "$VERSION" in
 esac
 [ "${#VERSION}" -le 128 ] || { echo "Image tag is too long" >&2; exit 1; }
 
-ARCHIVE="/tmp/manager-images/manager-$VERSION.tar"
+ARCHIVE="/home/ubuntu/images/manager-$VERSION.tar"
 IMAGE="docker.io/library/manager:$VERSION"
 CONTAINERD_SOCKET="${CONTAINERD_SOCKET:-/run/containerd/containerd.sock}"
 

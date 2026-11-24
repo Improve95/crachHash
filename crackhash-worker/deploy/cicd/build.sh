@@ -16,7 +16,7 @@ esac
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PROJECT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)
 NODE_SSH="${NODE_SSH:-ubuntu@192.168.56.11}"
-REMOTE_DIR=/tmp/worker-images
+REMOTE_DIR=/home/ubuntu/images
 IMAGE="worker:$VERSION"
 ARCHIVE="$SCRIPT_DIR/worker-$VERSION.tar"
 
@@ -26,9 +26,9 @@ docker image ls "$IMAGE"
 
 docker save -o "$ARCHIVE" "$IMAGE"
 
-ssh "$NODE_SSH" 'mkdir -p /tmp/worker-images'
+ssh "$NODE_SSH" 'mkdir -p /home/ubuntu/images'
 scp "$ARCHIVE" "$NODE_SSH:$REMOTE_DIR/worker-$VERSION.tar"
-scp "$SCRIPT_DIR/installimage.sh" "$NODE_SSH:$REMOTE_DIR/installimage.sh"
+scp "$SCRIPT_DIR/installimage.sh" "$NODE_SSH:$REMOTE_DIR/install-worker.sh"
 
 echo "Uploaded $IMAGE to $NODE_SSH:$REMOTE_DIR/worker-$VERSION.tar"
-echo "Next, run on node1: sh $REMOTE_DIR/installimage.sh $VERSION"
+echo "Next, run on node1: sh $REMOTE_DIR/install-worker.sh $VERSION"
