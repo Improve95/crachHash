@@ -45,6 +45,7 @@
 *.su
 *.idb
 *.pdb
+*.tar
 
 # Kernel Module Compile Results
 *.mod*
