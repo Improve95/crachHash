@@ -49,15 +49,13 @@ spec:
               memory: "768Mi"
 
           startupProbe:
-            httpGet:
-              path: /sprint1/health
+            tcpSocket:
               port: http
             periodSeconds: 5
             failureThreshold: 60
 
           readinessProbe:
-            httpGet:
-              path: /sprint1/health
+            tcpSocket:
               port: http
             periodSeconds: 5
             timeoutSeconds: 2
