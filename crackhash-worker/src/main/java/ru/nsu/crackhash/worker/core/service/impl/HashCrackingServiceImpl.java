@@ -12,11 +12,7 @@ import ru.nsu.crackhash.worker.core.service.HashCrackingService;
 import ru.nsu.crackhash.worker.core.service.crypto.CryptoService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -61,6 +57,7 @@ public class HashCrackingServiceImpl implements HashCrackingService {
                     List<String> answers = crackHash(request, distributedWorkerTaskId);
                     cancellationTokenMap.remove(distributedWorkerTaskId);
 
+                    log.info("Got answers, size={}", Optional.ofNullable(answers).map(List::size).orElse(null));
                     if (answers == null) {
                         return;
                     }
