@@ -12,7 +12,6 @@ public class SprintHealthController {
 
     @GetMapping("/sprint1/health")
     public Map<String, String> health() {
-        log.info("Get health probe");
         String pod = System.getenv("HOSTNAME");
         return Map.of(
                 "status", "UP",

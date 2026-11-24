@@ -7,4 +7,4 @@ import java.util.Map;
 
 @Valid
 @ConfigurationProperties(prefix = "cluster")
-public record ClusterProperties(Map<String, WorkerConfig> workers) {}
+public record ClusterConfig(Map<String, WorkerConfig> workers) {}

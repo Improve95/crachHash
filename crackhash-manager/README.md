@@ -117,8 +117,8 @@ cluster:
       url: http://localhost:8087
 ```
 
-Spring Boot импортирует файл через `spring.config.import` и связывает `cluster.workers`
-с `Map<String, WorkerConfig>` в `ClusterProperties`. Ключ — строковое имя или ID,
+Spring Boot импортирует файл через `spring.config.import` и связывает `ClusterConfig`
+с `Map<String, WorkerConfig>` в `ClusterConfig`. Ключ — строковое имя или ID,
 значение — расширяемый класс `WorkerConfig` с полем `url`. Число частей задачи
 вычисляется по размеру мапы и в REST-, и в Kafka-режиме. В Kafka URL не используется
 для отправки: задачи по-прежнему передаются через топик.

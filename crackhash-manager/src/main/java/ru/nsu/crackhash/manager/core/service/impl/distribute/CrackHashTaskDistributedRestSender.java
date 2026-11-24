@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import ru.nsu.crackhash.manager.config.cluster.ClusterProperties;
+import ru.nsu.crackhash.manager.config.cluster.ClusterConfig;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.service.CrackHashTaskDistributed;
 
@@ -24,11 +24,11 @@ public class CrackHashTaskDistributedRestSender implements CrackHashTaskDistribu
 
     private final AtomicInteger currentWorker = new AtomicInteger(0);
 
-    private final ClusterProperties clusterProperties;
+    private final ClusterConfig clusterConfig;
 
     @Override
     public void distributedSendCrackHashTasks(CrackHashTaskWorkerRequest request) {
-        var workers = List.copyOf(clusterProperties.workers().values());
+        var workers = List.copyOf(clusterConfig.workers().values());
         int currentWorkerNumber = currentWorker.getAndAccumulate(
             workers.size(), (cur, wn) -> (cur + 1) % wn
         );

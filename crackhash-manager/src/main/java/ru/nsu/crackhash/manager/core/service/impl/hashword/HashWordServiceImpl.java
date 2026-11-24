@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import ru.nsu.crackhash.manager.api.dto.*;
-import ru.nsu.crackhash.manager.config.cluster.ClusterProperties;
+import ru.nsu.crackhash.manager.config.cluster.ClusterConfig;
 import ru.nsu.crackhash.manager.core.kafka.dto.CrackHashTaskWorkerRequest;
 import ru.nsu.crackhash.manager.core.persistance.model.task.CrackingHashTask;
 import ru.nsu.crackhash.manager.core.persistance.repository.dao.TaskRepo;
@@ -31,7 +31,7 @@ public class HashWordServiceImpl implements HashWordService {
 
     private final TaskRepo taskRepo;
 
-    private ClusterProperties clusterProperties;
+    private final ClusterConfig clusterConfig;
 
     @Override
     public StartCrackingHashProcessResponse addCrackHashTaskInQueue(StartCrackingHashProcessRequest request) {
@@ -95,7 +95,7 @@ public class HashWordServiceImpl implements HashWordService {
 
     @Override
     public void increaseTaskProgress(AddWorkerProgressRequest request) {
-        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / (double) clusterProperties.workers().size());
+        taskRepo.increaseProgress(request.taskId(), request.increaseProgressPercent() / (double) clusterConfig.workers().size());
     }
 
     private void runTaskFromQueue() {
