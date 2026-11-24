@@ -17,6 +17,6 @@ docker image ls "$IMAGE"
 
 docker save -o "$ARCHIVE" "$IMAGE"
 
-scp "$ARCHIVE" ubuntu@192.168.56.11:/tmp/
+scp "$ARCHIVE" ubuntu@192.168.56.11:/tmp/worker
 
-echo "Образ $IMAGE собран и передан на worker: /tmp/$ARCHIVE"
+echo "Образ $IMAGE собран и передан на worker: /tmp/worker/$ARCHIVE"
