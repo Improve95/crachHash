@@ -60,7 +60,10 @@ environment:
 | Переменная       | По умолчанию            | Описание                                 |
 |------------------|-------------------------|------------------------------------------|
 | `SEND_TYPE`      | `rest`                  | Режим отправки задач: `rest` или `kafka` |
-| `CLUSTER_INFO_PATH` | `./clusterInfo.yaml` | Путь к внешнему YAML со списком воркеров |
+| `CLUSTER_CONFIG_TYPE` | `FILE` | Тип конфигурации кластера: `ENV` или `FILE` |
+| `WORKER_NUMBER` | `1` | Количество воркеров в режиме env |
+| `WORKER_URIS` | `localhost:8086` | Адреса воркеров через запятую, каждый со своим портом; схема по умолчанию `http://` |
+| `CLUSTER_INFO_PATH` | `./config/clusterInfo.yaml` | Путь к YAML в режиме `FILE` |
 | `KAFKA_URL`      | `localhost:9092`        | Адрес Kafka-брокера                      |
 | `MONGO_DB_HOST`  | `localhost`             | Хост MongoDB                             |
 | `MONGO_DB_PORT`  | `27017`                 | Порт MongoDB                             |
@@ -93,8 +96,6 @@ crack-hash:
       topic: crackhash_task_result_topic
 
 spring:
-  config:
-    import: "file:${CLUSTER_INFO_PATH:./clusterInfo.yaml}"
   mongodb:
     host: ${MONGO_DB_HOST:localhost}
     port: ${MONGO_DB_POST:27017}
@@ -104,9 +105,45 @@ spring:
     authentication-database: admin
 ```
 
-### Внешний список воркеров
+### Два способа настройки воркеров
 
-Файл `clusterInfo.yaml` хранится вне JAR и Docker-образа:
+`ClusterConfiguration` создаёт один бин `ClusterConfig` через `@Bean`.
+Сам `ClusterConfig` — объект с `Map<String, WorkerConfig>`, без `@ConfigurationProperties`.
+Переменная `CLUSTER_CONFIG_TYPE` задаёт свойство `cluster.config-type` в `application.yaml`.
+Spring связывает его с enum `ClusterConfigType` в `ClusterProperties` через
+`@ConfigurationProperties(prefix = "cluster")`. Метод создания бина выбирает
+ветку `ENV` или `FILE` по этому значению. Неизвестный тип останавливает запуск.
+
+По умолчанию данные берутся из файла (`FILE`). В режиме `ENV` YAML-файл не читается и не требуется.
+Пример для одного воркера в Kubernetes (добавьте в `env` контейнера менеджера):
+
+```yaml
+env:
+  - name: CLUSTER_CONFIG_TYPE
+    value: ENV
+  - name: WORKER_NUMBER
+    value: "1"
+  - name: WORKER_URIS
+    value: "10.100.123.143:80"
+```
+
+Получится `worker-1` с URL `http://10.100.123.143:80`. Указывайте порт Service,
+доступный менеджеру. Для нескольких воркеров задайте адреса через запятую и соответствующее
+количество; несовпадение останавливает запуск. Например:
+
+```env
+CLUSTER_CONFIG_TYPE=ENV
+WORKER_NUMBER=3
+WORKER_URIS=10.100.123.143:80,http://worker-2:8087,https://worker-3:8443
+```
+
+Каждый адрес задаёт собственный порт. Можно передать `host:port` или полный HTTP/HTTPS URL.
+Отдельная переменная `WORKER_PORT` больше не используется.
+Для переключения с файла на env задайте `CLUSTER_CONFIG_TYPE=ENV`.
+
+### Список воркеров из файла
+
+Задайте `CLUSTER_CONFIG_TYPE=FILE`. Файл `config/clusterInfo.yaml` имеет прежний формат:
 
 ```yaml
 cluster:
@@ -117,8 +154,10 @@ cluster:
       url: http://localhost:8087
 ```
 
-Spring Boot импортирует файл через `spring.config.import` и связывает `ClusterConfig`
-с `Map<String, WorkerConfig>` в `ClusterConfig`. Ключ — строковое имя или ID,
+В ветке `FILE` конфигурационный класс читает YAML через `YamlPropertySourceLoader`,
+связывает `cluster.workers` с мапой через Spring Binder и создаёт `ClusterConfig`.
+Остальные настройки приложения из этого файла не импортируются.
+Ключ — строковое имя или ID,
 значение — расширяемый класс `WorkerConfig` с полем `url`. Число частей задачи
 вычисляется по размеру мапы и в REST-, и в Kafka-режиме. В Kafka URL не используется
 для отправки: задачи по-прежнему передаются через топик.
@@ -126,32 +165,42 @@ Spring Boot импортирует файл через `spring.config.import` и
 Используйте простые ID из букв, цифр и дефисов; числовые ID заключайте в кавычки.
 Для ключей со специальными символами используйте синтаксис Spring, например `"[worker/east]"`.
 Файл обязателен: отсутствие файла, пустая мапа или пустой URL останавливают запуск.
-`WORKER_NUMBER` и `WORKER_URL_*` больше не используются.
+В этом режиме `WORKER_NUMBER` и `WORKER_URIS` не используются; URL каждого воркера берётся из YAML.
 
 Путь задаётся без префикса `file:`. Относительный путь считается от рабочего каталога процесса.
 Пример запуска в PowerShell:
 
 ```powershell
+$env:CLUSTER_CONFIG_TYPE = 'FILE'
 $env:CLUSTER_INFO_PATH = 'C:/configs/clusterInfo.yaml'
 java -jar build/libs/manager-service-0.0.1-SNAPSHOT.jar
 ```
 
-Для Docker Compose используется `config/docker/clusterInfo.yaml`, каталог монтируется
-только для чтения в `/etc/crackhash`, а `CLUSTER_INFO_PATH` задан в `environment`.
-После изменения файла выполните `docker compose restart crackhash-manager-service`.
-При первом переходе на новую конфигурацию пересоздайте контейнер через `docker compose up -d --build`.
+Dockerfile включает файл в образ по пути `/app/config/clusterInfo.yaml`.
+Docker Compose задаёт `CLUSTER_CONFIG_TYPE=FILE` и этот абсолютный путь.
+При изменении встроенного файла пересоберите образ и обновите контейнер.
+Для Kubernetes с файлом внутри образа задайте:
+
+```yaml
+env:
+  - name: CLUSTER_CONFIG_TYPE
+    value: FILE
+  - name: CLUSTER_INFO_PATH
+    value: /app/config/clusterInfo.yaml
+```
 
 ### Хранение в Kubernetes
 
 Храните конфиги окружений в Git рядом с манифестами развёртывания (при необходимости
 в отдельном инфраструктурном репозитории). В кластере создавайте из файла ConfigMap
 и монтируйте её как каталог. В URL указывайте стабильные DNS-имена Service воркеров,
-а не IP Pod. Конфигурация не включается в образ приложения.
+а не IP Pod. При переходе на этот вариант файл из ConfigMap будет использоваться
+вместо встроенного в образ.
 
 Создать или обновить ConfigMap из подготовленного для Kubernetes файла:
 
 ```bash
-kubectl create configmap crackhash-cluster --from-file=clusterInfo.yaml=./clusterInfo.yaml --dry-run=client -o yaml | kubectl apply -f -
+kubectl create configmap crackhash-cluster --from-file=clusterInfo.yaml=./config/clusterInfo.yaml --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 Фрагмент Deployment (добавьте к остальным настройкам контейнера менеджера):
@@ -163,6 +212,8 @@ spec:
       containers:
         - name: crackhash-manager
           env:
+            - name: CLUSTER_CONFIG_TYPE
+              value: FILE
             - name: CLUSTER_INFO_PATH
               value: /etc/crackhash/clusterInfo.yaml
           volumeMounts:

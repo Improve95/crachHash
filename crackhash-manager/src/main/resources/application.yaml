@@ -2,8 +2,6 @@ server:
   port: 8085
 
 spring:
-  config:
-    import: "file:${CLUSTER_INFO_PATH:./config/clusterInfo.yaml}"
   application:
     name: crackhash-manager
 
@@ -13,6 +11,12 @@ spring:
       uuid: standard
 
 send-type: ${SEND_TYPE:rest}
+
+cluster:
+  config-type: ${CLUSTER_CONFIG_TYPE:FILE}
+  info-path: ${CLUSTER_INFO_PATH:./config/clusterInfo.yaml}
+  worker-number: ${WORKER_NUMBER:1}
+  worker-uris: ${WORKER_URIS:localhost:8086}
 
 crack-hash:
   task:
