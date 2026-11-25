@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: manager
-          image: manager:0.2.5
+          image: manager:0.3.0
           imagePullPolicy: Never
 
           ports:

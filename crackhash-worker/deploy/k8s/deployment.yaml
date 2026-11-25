@@ -36,7 +36,7 @@ spec:
             - name: SEND_TYPE
               value: "rest"
             - name: MANAGER_URL
-              value: "http://10.109.169.222:80"
+              value: "http://manager.imp-manager"
             - name: WORKER_NUMBER
               value: "1"
 
