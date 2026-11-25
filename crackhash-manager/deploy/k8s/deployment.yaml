@@ -30,14 +30,15 @@ spec:
             - name: http
               containerPort: 8080
 
-          env:
-            - name: SERVER_PORT
-              value: "8080"
-            - name: SEND_TYPE
-              value: "rest"
-            - name: CLUSTER_INFO_PATH
-              value: "./config/clusterInfo.yaml"
- 
+          envFrom:
+            - configMapRef:
+                name: manager-configmap
+
+          volumeMounts:
+            - name: manager-volumes
+              mountPath: /app/config
+              readOnly: true
+
           resources:
             requests:
               cpu: "100m"
@@ -48,14 +49,22 @@ spec:
 
           startupProbe:
             httpGet:
-              path: /sprint1/health
+              path: /manager/health
               port: http
             periodSeconds: 5
             failureThreshold: 60
 
           readinessProbe:
             httpGet:
-              path: /sprint1/health
+              path: /manager/health
               port: http
             periodSeconds: 5
             timeoutSeconds: 2
+
+      volumes:
+        - name: manager-volumes
+          configMap:
+            name: manager-configmap
+            items:
+              - key: clusterInfo.yaml
+                path: clusterInfo.yaml

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: worker-configmap
+  namespace: imp-worker
+data:
+  SERVER_PORT: "8080"
+  SEND_TYPE: "rest"
+  MANAGER_URL: "http://manager.imp-manager"
+  WORKER_NUMBER: "1"

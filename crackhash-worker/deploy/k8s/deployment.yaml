@@ -30,15 +30,9 @@ spec:
             - name: http
               containerPort: 8080
 
-          env:
-            - name: SERVER_PORT
-              value: "8080"
-            - name: SEND_TYPE
-              value: "rest"
-            - name: MANAGER_URL
-              value: "http://manager.imp-manager"
-            - name: WORKER_NUMBER
-              value: "1"
+          envFrom:
+            - configMapRef:
+                name: worker-configmap
 
           resources:
             requests:
@@ -49,13 +43,15 @@ spec:
               memory: "768Mi"
 
           startupProbe:
-            tcpSocket:
+            httpGet:
+              path: /worker/health
               port: http
             periodSeconds: 5
             failureThreshold: 60
 
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /worker/health
               port: http
             periodSeconds: 5
             timeoutSeconds: 2

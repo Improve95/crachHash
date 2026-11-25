@@ -13,8 +13,6 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY ./config/clusterInfo.yaml /app/config/clusterInfo.yaml
-
 COPY --from=build /app/build/libs/*.jar app.jar
 
 EXPOSE 8085

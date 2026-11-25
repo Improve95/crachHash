@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: manager-configmap
+  namespace: imp-manager
+data:
+  SERVER_PORT: "8080"
+  SEND_TYPE: "rest"
+  CLUSTER_CONFIG_TYPE: "FILE"
+  CLUSTER_INFO_PATH: "/app/config/clusterConfig.yaml"
