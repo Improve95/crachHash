@@ -8,3 +8,9 @@ data:
   SEND_TYPE: "rest"
   CLUSTER_CONFIG_TYPE: "FILE"
   CLUSTER_INFO_PATH: "/app/config/clusterConfig.yaml"
+  
+  clusterConfig.yaml: |
+    cluster:
+      workers:
+        worker-1:
+          url: http://worker.imp-worker

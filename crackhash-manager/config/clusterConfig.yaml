@@ -1,4 +1,4 @@
 cluster:
   workers:
     worker-1:
-      url: http://worker.imp-worker
+      url: http://worker.imp-worker-test

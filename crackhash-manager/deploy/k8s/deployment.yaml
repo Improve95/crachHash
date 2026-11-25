@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: manager
-          image: manager:0.3.0
+          image: manager:0.4.0
           imagePullPolicy: Never
 
           ports:
@@ -35,7 +35,7 @@ spec:
                 name: manager-configmap
 
           volumeMounts:
-            - name: manager-volumes
+            - name: manager-cluster-config
               mountPath: /app/config
               readOnly: true
 
@@ -62,9 +62,9 @@ spec:
             timeoutSeconds: 2
 
       volumes:
-        - name: manager-volumes
+        - name: manager-cluster-config
           configMap:
             name: manager-configmap
             items:
-              - key: clusterInfo.yaml
-                path: clusterInfo.yaml
+              - key: clusterConfig.yaml
+                path: clusterConfig.yaml

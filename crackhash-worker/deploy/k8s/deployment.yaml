@@ -23,7 +23,7 @@ spec:
 
       containers:
         - name: worker
-          image: worker:0.2.0
+          image: worker:0.3.0
           imagePullPolicy: Never
 
           ports:
