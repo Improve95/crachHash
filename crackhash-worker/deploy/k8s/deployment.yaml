@@ -5,18 +5,19 @@ metadata:
   namespace: imp-worker
   labels:
     app: worker
-    sprint: "1"
+    env: test
+    spring: "2"
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: worker
-      exercise: sprint1
+      env: test
   template:
     metadata:
       labels:
         app: worker
-        exercise: sprint1
+        env: test
     spec:
       nodeSelector:
         sprint1-worker: "true"

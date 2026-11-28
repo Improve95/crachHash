@@ -8,7 +8,11 @@ data:
   SEND_TYPE: "rest"
   CLUSTER_CONFIG_TYPE: "FILE"
   CLUSTER_INFO_PATH: "/app/config/clusterConfig.yaml"
-  
+
+  MONGO_DB_HOSTS: "mongo-1:27017,mongo-2:27017,mongo-3:27017"
+  MONGO_DB: "crackhash_db_mongo"
+  MONGO_DB_ARGS: "authSource=admin&replicaSet=rs0"
+
   clusterConfig.yaml: |
     cluster:
       workers:

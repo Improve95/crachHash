@@ -5,18 +5,19 @@ metadata:
   namespace: imp-manager
   labels:
     app: manager
-    sprint: "1"
+    env: test
+    sprint: "2"
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: manager
-      exercise: sprint1
+      env: test
   template:
     metadata:
       labels:
         app: manager
-        exercise: sprint1
+        env: test
     spec:
       nodeSelector:
         sprint1-manager: "true"
@@ -33,6 +34,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: manager-configmap
+            - secretRef:
+                name: manager-secrets
 
           volumeMounts:
             - name: manager-cluster-config
